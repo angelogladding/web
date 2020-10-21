@@ -1,0 +1,196 @@
+<!doctype html>
+
+<head>
+<title>Microformats Test Suite</title>
+<style>
+section {
+    background-color: #ddd; }
+</style>
+</head>
+
+<body>
+
+<h1>Microformats Test Suite</h1>
+
+<ol>
+<li><a href=#h-adr>h-adr</a></li>
+<li><a href=#h-card>h-card</a></li>
+<li><a href=#h-entry>h-entry</a></li>
+<li><a href=#h-event>h-event</a></li>
+<li><a href=#h-feed>h-feed</a></li>
+<li><a href=#h-geo>h-geo</a></li>
+<li><a href=#h-product>h-product</a></li>
+<li><a href=#h-recipe>h-recipe</a></li>
+<li><a href=#h-resume>h-resume</a></li>
+<li><a href=#h-review>h-review</a></li>
+</ol>
+
+<article id=h-adr>
+<h2>h-adr</h2>
+
+<section>
+<h3>simple</h3>
+<div>
+<p class=h-adr>
+    <span class=p-street-address>665 3rd St.</span>  
+    <span class=p-extended-address>Suite 207</span>  
+    <span class=p-locality>San Francisco</span>,  
+    <span class=p-region>CA</span>  
+    <span class=p-postal-code>94107</span>  
+    <span class=p-country-name>U.S.A.</span>  
+</p>
+</div>
+<script type=application/json>
+{
+    "items": [{
+        "type": ["h-adr"],
+        "properties": {
+            "street-address": ["665 3rd St."],
+            "extended-address": ["Suite 207"],
+            "locality": ["San Francisco"],
+            "region": ["CA"],
+            "postal-code": ["94107"],
+            "country-name": ["U.S.A."]
+        }
+    }],
+    "rels": {},
+    "rel-urls": {}
+}
+</script>
+</section>
+
+<section>
+<h3>text only</h3>
+<div>
+<p class=h-adr>665 3rd St. Suite 207 San Francisco, CA 94107 U.S.A.</p>
+</div>
+<script type=application/json>
+{
+    "items": [{
+        "type": ["h-adr"],
+        "properties": {
+            "name": ["665 3rd St. Suite 207 San Francisco, CA 94107 U.S.A."]
+        }
+    }],
+    "rels": {},
+    "rel-urls": {}
+}
+</script>
+</section>
+
+<section>
+<h3>geo</h3>
+<div>
+<p class=h-adr>
+    <span class=p-name>Bricklayer's Arms</span>
+    <span class=p-label> 
+        <span class=p-street-address>3 Charlotte Road</span>,  
+        <span class=p-locality>City of London</span>,  
+        <span class=p-postal-code>EC2A 3PE</span>, 
+        <span class=p-country-name>UK</span> 
+    </span> – 
+    Geo:(<span class=p-geo>51.526421;-0.081067</span>) 
+</p>
+</div>
+<script type=application/json>
+{
+    "items": [{
+        "type": ["h-adr"],
+        "properties": {
+            "name": ["Bricklayer's Arms"],
+            "label": ["3 Charlotte Road,  \n        City of London,  \n        EC2A 3PE, \n        UK"],
+            "street-address": ["3 Charlotte Road"],
+            "locality": ["City of London"],
+            "postal-code": ["EC2A 3PE"],
+            "country-name": ["UK"],
+            "geo": ["51.526421;-0.081067"]
+        }
+    }],
+    "rels": {},
+    "rel-urls": {}
+}
+</script>
+</section>
+
+<section>
+<h3>geo url</h3>
+<div>
+<p class=h-adr>
+    <a class="p-name u-geo"
+        href="geo:51.526421;-0.081067;crs=wgs84;u=40">Bricklayer's Arms</a>, 
+    <span class=p-locality>London</span> 
+</p>
+</div>
+<script type=application/json>
+{
+    "items": [{
+        "type": ["h-adr"],
+        "properties": {
+            "name": ["Bricklayer's Arms"],
+            "geo": ["geo:51.526421;-0.081067;crs=wgs84;u=40"],
+            "locality": ["London"]
+        }
+    }],
+    "rels": {},
+    "rel-urls": {}
+}
+</script>
+</section>
+
+</article>
+
+<article id=h-card>
+<h2>h-card</h2>
+
+</article>
+
+<article id=h-entry>
+<h2>h-entry</h2>
+
+</article>
+
+<article id=h-event>
+<h2>h-event</h2>
+
+</article>
+
+<article id=h-feed>
+<h2>h-feed</h2>
+
+</article>
+
+<article id=h-geo>
+<h2>h-geo</h2>
+
+</article>
+
+<article id=h-product>
+<h2>h-product</h2>
+
+</article>
+
+<article id=h-recipe>
+<h2>h-recipe</h2>
+
+</article>
+
+<article id=h-resume>
+<h2>h-resume</h2>
+
+</article>
+
+<article id=h-review>
+<h2>h-review</h2>
+
+</article>
+
+<!--section>
+<h3></h3>
+<div>
+</div>
+<script type=application/json>
+</script>
+</section-->
+
+</body>
+</html>
