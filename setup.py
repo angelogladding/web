@@ -1,4 +1,4 @@
-# [`web`][1] Copyright 2020- @[Angelo Gladding][2]
+# [`web`][1] Copyright @[Angelo Gladding][2] 2020-
 #
 # This program is free software: it is distributed in the hope that it
 # will be useful, but *without any warranty*; without even the implied
@@ -10,13 +10,13 @@
 #
 # *[GNU]: GNU's Not Unix
 #
-# [1]: //angelogladding.com/code/web
-# [2]: //angelogladding.com
-# [3]: //gnu.org
-# [4]: //gnu.org/licenses/agpl
-# [5]: //fsf.org
+# [1]: https://github.com/angelogladding/web
+# [2]: https://angelogladding.com
+# [3]: https://gnu.org
+# [4]: https://gnu.org/licenses/agpl
+# [5]: https://fsf.org
 
-"""Install tools for a metamodern web environment."""
+"""Tools for a metamodern web environment."""
 
 from setuptools import setup
 
