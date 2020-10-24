@@ -1,4 +1,4 @@
-# [`web.host`][1] Copyright @[Angelo Gladding][2] 2020-
+# [`host.py`][1] Copyright @[Angelo Gladding][2] 2020-
 #
 # This program is free software: it is distributed in the hope that it
 # will be useful, but *without any warranty*; without even the implied
