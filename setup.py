@@ -16,7 +16,7 @@
 # [4]: https://gnu.org/licenses/agpl
 # [5]: https://fsf.org
 
-"""Tools for a metamodern web environment."""
+"""Tools for metamodern web development."""
 
 from setuptools import setup
 
