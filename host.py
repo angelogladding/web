@@ -109,7 +109,7 @@ def setup():
     # Python (w/ SQLite extensions)
     try:
         py = sh.Command(str(bin_dir /
-                        f"python{versions["python"].rpartition(".")[0]}"))
+                        f"python{versions['python'].rpartition(".")[0]}"))
     except sh.CommandNotFound:
         _version = versions["python"]
         build(f"python.org/ftp/python/{_version}/Python-{_version}.tar.xz",
