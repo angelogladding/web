@@ -106,10 +106,13 @@ def setup():
 
     src_dir.mkdir(parents=True, exist_ok=True)
 
+    def get_python_sh():
+        py_major_version = f"python{versions['python'].rpartition('.')[0]}"
+        return sh.Command(str(bin_dir / py_major_version))
+
     # Python (w/ SQLite extensions)
     try:
-        py = sh.Command(str(bin_dir /
-                        f"python{versions['python'].rpartition('.')[0]}"))
+        get_python_sh()
     except sh.CommandNotFound:
         _version = versions["python"]
         build(f"python.org/ftp/python/{_version}/Python-{_version}.tar.xz",
@@ -117,7 +120,7 @@ def setup():
 
     if not env_dir.exists():
         log("creating virtual environment")
-        py()("-m", "venv", env_dir)
+        get_python_sh()("-m", "venv", env_dir)
         sh.echo(textwrap.dedent("""\
             #!/usr/bin/env bash
             VENV=$1
