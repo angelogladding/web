@@ -26,6 +26,7 @@ import functools
 import getpass
 import os
 import pathlib
+import sys
 import textwrap
 import time
 
@@ -116,11 +117,17 @@ def setup_system() -> None:
         sh.cp(".ssh/authorized_keys", "/home/webhost/.ssh")
         sh.chown("webhost:webhost", "/home/webhost/.ssh", "-R")
 
-        sh.cp("webhost", "/home/webhost")
-        sh.chown("webhost:webhost", "/home/webhost/webhost")
+        sh.cp("host.py", "/home/webhost")
+        sh.chown("webhost:webhost", "/home/webhost/host.py")
 
         sh.tee(sh.echo("webhost  ALL=NOPASSWD: ALL"),
                "-a", "/etc/sudoers.d/01_webhost")
+
+    def _print(line):
+        print(line, end="")
+
+    print("Spawning grove...")
+    sh.runuser("-", "webhost", "-c", "python3 host.py setup-host", _out=_print)
 
 
 @requires_user("webhost")
@@ -250,25 +257,16 @@ def generate_dhparam():
 
 
 def main():
+    print(sys.argv)
+    return
     parser = argparse.ArgumentParser()
-    contexts = parser.add_subparsers()
-    init_p = contexts.add_parser("init", help="completely initialize the host")
-    init_p.set_defaults(context="init")
-    setup_system_p = contexts.add_parser("setup-system", help="setup system")
-    setup_system_p.set_defaults(context="setup-system")
-    setup_host_p = contexts.add_parser("setup-host", help="setup host")
-    setup_host_p.set_defaults(context="setup-host")
-    setup_host_p.add_argument("--origin", default=ORIGIN)
+    parser.add_argument("stage", default="userinit")
     args = parser.parse_args()
     try:
-        context = args.context
-    except AttributeError:
-        context = "init"
-    try:
-        if context == "init":
-            init()
-        elif context == "setup-system":
-            setup_system()
+        if args.stage == "first":
+            run_first()
+        elif args.stage == "complete":
+            run_second()
         elif context == "setup-system":
             setup_system()
     except UserError as err:
