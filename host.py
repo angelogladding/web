@@ -78,14 +78,14 @@ def bootstrap():
         log("using existing webhost user")
         # TODO test for sudo to provide detailed error message
     else:
-        log("creating sudoer webhost")
+        log("creating sudoer `webhost` and carrying over SSH credentials")
         sh.mkdir("/home/webhost/.ssh")
         sh.cp(".ssh/authorized_keys", "/home/webhost/.ssh")
         sh.chown("webhost:webhost", "/home/webhost/.ssh", "-R")
-        sh.cp("host.py", "/home/webhost")
-        sh.chown("webhost:webhost", "/home/webhost/host.py")
         sh.tee(sh.echo("webhost  ALL=NOPASSWD: ALL"),
                "-a", "/etc/sudoers.d/01_webhost")
+    sh.cp("host.py", "/home/webhost")
+    sh.chown("webhost:webhost", "/home/webhost/host.py")
     sh.runuser("-", "webhost", "-c", "python3 host.py",
                _out=functools.partial(print, end=""))
 
