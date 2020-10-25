@@ -1,9 +1,9 @@
 # web
 tools for metamodern web development
 
-## Bootstrap your host
+## Bootstrap a host
 
-*replace example.org with your domain name*
+*NOTE: replace example.org with your domain name*
 
 1) Create a new Debian 10 machine (at your host)
 2) Point your domain name to your machine's IP address (at your registrar)
