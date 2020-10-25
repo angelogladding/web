@@ -20,7 +20,6 @@
 
 # TODO tor-browser
 
-import argparse
 import base64
 import functools
 import getpass
@@ -30,7 +29,7 @@ import sys
 import textwrap
 import time
 
-__all__ = ["init", "setup_system", "setup_host"]
+__all__ = ["bootstrap", "setup"]
 
 ORIGIN = "github.com/angelogladding"
 
@@ -65,36 +64,35 @@ bin_dir = system_dir / "bin"
 env_dir = system_dir / "env"
 versions = {"python": "3.9.0", "nginx": "1.18.0", "tor": "0.4.4.5",
             "firefox": "82.0", "geckodriver": "0.27.0"}
-py_pkgs = ("pkg", "term", "src", "kv", "sql", "web", "canopy")
+py_pkgs = ("src", "term", "kv", "sql", "web", "canopy")
 
 dhparam_path = system_dir / "nginx/conf/dhparam.pem"
-dhparam_size = "512"  # TODO revert to "2048" for production!
-# TODO XXX pubkey_size = "1024"
+dhparam_size = "512"  # TODO FIXME revert to "2048" for production!
 
 
-class UserError(Exception):
-    """This program must be run under a different user."""
+def bootstrap():
+    """Bootstrap user `webhost` and initiate setup."""
+    try:
+        sh.adduser("webhost", "--disabled-login", "--gecos", "Webhost")
+    except sh.ErrorReturnCode_1:
+        log("using existing webhost user")
+        # TODO test for sudo to provide detailed error message
+    else:
+        log("creating sudoer webhost")
+        sh.mkdir("/home/webhost/.ssh")
+        sh.cp(".ssh/authorized_keys", "/home/webhost/.ssh")
+        sh.chown("webhost:webhost", "/home/webhost/.ssh", "-R")
+        sh.cp("host.py", "/home/webhost")
+        sh.chown("webhost:webhost", "/home/webhost/host.py")
+        sh.tee(sh.echo("webhost  ALL=NOPASSWD: ALL"),
+               "-a", "/etc/sudoers.d/01_webhost")
+    sh.runuser("-", "webhost", "-c", "python3 host.py",
+               _out=functools.partial(print, end=""))
 
-    def __init__(self, required_user):
-        self.required_user = required_user
 
-
-def requires_user(required_user):
-    """Raise a UserError if decorated function is run by the wrong user."""
-    def wrapper(f):
-        @functools.wraps(f)
-        def inner(*args, **kwargs):
-            if getpass.getuser() != required_user:
-                raise UserError(required_user)
-            return f(**args, **kwargs)
-        return inner
-    return wrapper
-
-
-@requires_user("root")
-def setup_system() -> None:
-    """Update the operating system, install required pre-built packages and setup user webhost."""
-    apt = sh.apt.bake(_env=dict(os.environ, DEBIAN_FRONTEND="noninteractive"))
+def setup():
+    """Update the operating system and install core dependencies."""
+    apt = sh.sudo.bake("apt", _env=dict(os.environ, DEBIAN_FRONTEND="noninteractive"))
     log("updating")
     apt("update")
     log("upgrading")
@@ -106,38 +104,12 @@ def setup_system() -> None:
             log("  installing", pkg)
             apt("install", "-yq", pkg)
 
-    try:
-        sh.adduser("webhost", "--disabled-login", "--gecos", "Webhost")
-    except sh.ErrorReturnCode_1:
-        pass
-    else:
-        log("creating sudoer webhost")
-
-        sh.mkdir("/home/webhost/.ssh")
-        sh.cp(".ssh/authorized_keys", "/home/webhost/.ssh")
-        sh.chown("webhost:webhost", "/home/webhost/.ssh", "-R")
-
-        sh.cp("host.py", "/home/webhost")
-        sh.chown("webhost:webhost", "/home/webhost/host.py")
-
-        sh.tee(sh.echo("webhost  ALL=NOPASSWD: ALL"),
-               "-a", "/etc/sudoers.d/01_webhost")
-
-    def _print(line):
-        print(line, end="")
-
-    print("Spawning grove...")
-    sh.runuser("-", "webhost", "-c", "python3 host.py setup-host", _out=_print)
-
-
-@requires_user("webhost")
-def setup_host(origin) -> None:
-    """Build and install core packages (~13 minutes)."""
     src_dir.mkdir(parents=True, exist_ok=True)
 
     # Python (w/ SQLite extensions)
     try:
-        get_python_sh()
+        py = sh.Command(str(bin_dir /
+                        f"python{versions["python"].rpartition(".")[0]}"))
     except sh.CommandNotFound:
         _version = versions["python"]
         build(f"python.org/ftp/python/{_version}/Python-{_version}.tar.xz",
@@ -145,7 +117,7 @@ def setup_host(origin) -> None:
 
     if not env_dir.exists():
         log("creating virtual environment")
-        get_python_sh()("-m", "venv", env_dir)
+        py()("-m", "venv", env_dir)
         sh.echo(textwrap.dedent("""\
             #!/usr/bin/env bash
             VENV=$1
@@ -161,7 +133,7 @@ def setup_host(origin) -> None:
             log(" ", py_pkg)
             try:
                 sh.sh("runinenv", env_dir, "pip", "install", "-e",
-                      f"git+https://{origin}/{py_pkg}.git#egg={py_pkg}")
+                      f"git+https://{ORIGIN}/{py_pkg}.git#egg={py_pkg}")
             except sh.ErrorReturnCode_1 as err:
                 print(err)
 
@@ -210,14 +182,11 @@ def setup_host(origin) -> None:
         sh.mv("geckodriver", geckodriver_dir, _cwd=str(src_dir))
         sh.ln("-s", src_dir / geckodriver_dir / "geckodriver", bin_dir)
 
+    # TODO cleanup src_dir
+
 
 def log(*args, **kwargs):
     print(f"{int(time.time() - start): 4d}", *args, **kwargs)
-
-
-def get_python_sh():
-    py_major_version = versions["python"].rpartition(".")[0]
-    return sh.Command(str(bin_dir / f"python{py_major_version}"))
 
 
 def build(archive_url, *config_args):
@@ -257,22 +226,13 @@ def generate_dhparam():
 
 
 def main():
-    print(sys.argv)
-    return
-    parser = argparse.ArgumentParser()
-    parser.add_argument("stage", default="userinit")
-    args = parser.parse_args()
-    try:
-        if args.stage == "first":
-            run_first()
-        elif args.stage == "complete":
-            run_second()
-        elif context == "setup-system":
-            setup_system()
-    except UserError as err:
-        log(f"must be run as {err.required_user}")
-        parser.exit(1)
-    parser.exit(0)
+    # TODO test if in respective home directories
+    user = getpass.getuser()
+    if user == "root":
+        bootstrap()
+    elif user == "webhost":
+        setup()
+    return 0
 
 
 try:
@@ -288,7 +248,7 @@ except ImportError:
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
 
 
 # `python-sh v1.12.14` Copyright (c) 2011- Andrew Moffat
