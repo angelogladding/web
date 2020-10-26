@@ -104,6 +104,10 @@ def setup():
             log("  installing", pkg)
             apt("install", "-yq", pkg)
 
+    # Debian automatically starts a redis server, stop and disable it permanently
+    sh.sudo("/etc/init.d/redis-server", "stop")
+    sh.sudo("systemctl", "disable", "redis")
+
     src_dir.mkdir(parents=True, exist_ok=True)
 
     def get_python_sh():
