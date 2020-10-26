@@ -64,7 +64,7 @@ bin_dir = system_dir / "bin"
 env_dir = system_dir / "env"
 versions = {"python": "3.7.9", "nginx": "1.18.0", "tor": "0.4.4.5",
             "firefox": "82.0", "geckodriver": "0.27.0"}
-py_pkgs = ("src", "term", "kv", "sql", "web", "canopy")
+py_pkgs = ("pkg", "src", "term", "kv", "sql", "web", "canopy")
 
 dhparam_path = system_dir / "nginx/conf/dhparam.pem"
 dhparam_size = "512"  # TODO FIXME revert to "2048" for production!
