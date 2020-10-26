@@ -62,7 +62,7 @@ system_dir = pathlib.Path("/home/webhost/system")
 src_dir = system_dir / "src"
 bin_dir = system_dir / "bin"
 env_dir = system_dir / "env"
-versions = {"python": "3.7.9", "nginx": "1.18.0", "tor": "0.4.4.5",
+versions = {"python": "3.9.0", "nginx": "1.18.0", "tor": "0.4.4.5",
             "firefox": "82.0", "geckodriver": "0.27.0"}
 py_pkgs = ("pkg", "src", "term", "kv", "sql", "web", "canopy")
 
