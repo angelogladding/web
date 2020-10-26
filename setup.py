@@ -22,9 +22,9 @@ from setuptools import setup
 
 setup(requires=["acme_tiny", "BeautifulSoup4", "cssselect", "gevent",
                 "html5lib", "httpagentparser", "lxml", "mf2py", "mf2util",
-                "mm", "pendulum", "pycrypto", "python_mimeparse",
+                "pendulum", "pycrypto", "python_mimeparse",
                 "pyvirtualdisplay", "PySocks", "regex", "requests",
-                "selenium", "stem", "unidecode", "uri", "uwsgi", "watchdog"],
+                "selenium", "stem", "unidecode", "uwsgi", "watchdog"],
       provides={"pygments.styles": ["Lunar = solarized:Lunar",
                                     "Solar = solarized:Solar"],
                 "term.apps": ["mf = mf.__main__:main",
