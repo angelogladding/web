@@ -18,13 +18,14 @@ class Main:
     def _get(self):
         hostname = sh.hostname("--fqdn")
         ip = sh.hostname("-I").split()[0]
+        uptime = sh.uptime()
         configs = []
         for config in pathlib.Path("/etc/supervisor/conf.d").glob("*.conf"):
             with config.open() as fp:
                 configs.append((config.name, fp.read()))
         status = sh.sudo("supervisorctl", "status")
         apps = get_apps()
-        return views.main(hostname, ip, status, configs, apps)
+        return views.main(hostname, ip, uptime, status, configs, apps)
 
 
 @hostapp.route(r"apps")
