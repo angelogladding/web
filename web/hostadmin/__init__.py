@@ -4,7 +4,7 @@ import mm
 import pathlib
 import sh
 
-from ..framework import application, get_apps, form
+from ..framework import application, get_apps, form, SeeOther
 
 
 hostapp = application("HostAdmin")
@@ -37,4 +37,5 @@ class Apps:
         owner, _, name = app.partition("/")
         sh.sh("runinenv", "system/env", "pip", "install", "-e",
               f"git+https://github.com/{owner}/{name}.git#egg={name}")
-        return "done!"
+        sh.sudo("supervisorctl", "restart", "hostadmin")
+        raise SeeOther("/")

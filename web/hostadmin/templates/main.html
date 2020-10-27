@@ -28,11 +28,12 @@ $for name, config in configs:
 <h2>Applications</h2>
 $for package, applications in sorted(apps.items()):
     <h3>$package</h3>
+    <form><button>Update</button></form>
     <form>
     <ul>
     $for appns, app, mod_name, attrs in applications:
-        <li>$appns $app $mod_name $attrs
-        <button>Update</button> <button>Mount</button></li>
+        <li>$app.name.lower() &rarr; $mod_name:$attrs[0]
+        <button>Mount</button></li>
     </ul>
     </form>
 
