@@ -215,6 +215,8 @@ def spawn_host_admin_app():
         supervisor.write(fp)
     sh.sudo("ln", "-sf", hostadmin_conf.resolve(),
             "/etc/supervisor/conf.d/00_hostadmin.conf")
+    sh.sudo("supervisorctl", "reread")
+    sh.sudo("supervisorctl", "update")
 
 
 def log(*args, **kwargs):

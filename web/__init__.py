@@ -25,6 +25,7 @@ from .framework.indieweb import indieauth
 from .framework.indieweb import micropub
 from .framework.indieweb import webmention
 from .framework.indieweb import websub
+from .hostadmin import hostapp
 from .response import (Status,  # noqa
                        OK, Created, Accepted, NoContent, MultiStatus,
                        Found, SeeOther, PermanentRedirect,
@@ -32,16 +33,6 @@ from .response import (Status,  # noqa
                          MethodNotAllowed, Conflict, Gone)
 from .tasks import run_queue
 
-__all__ = ["mf", "mm", "template", "pendulum", "indieauth",
-           "micropub", "webmention", "websub", "run_queue",
-           "Created"]
+__all__ = ["mf", "mm", "template", "pendulum", "indieauth", "micropub",
+           "webmention", "websub", "run_queue", "hostapp", "Created"]
 __all__ += agent.__all__ + framework.__all__
-
-hostapp = application("HostAdmin")
-
-@hostapp.route(r"")
-class Main:
-    """Host admin interface."""
-    
-    def _get(self):
-        return "host admin main page!"
