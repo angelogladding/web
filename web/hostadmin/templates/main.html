@@ -11,10 +11,12 @@ $for name, config in configs:
 <h2>Applications</h2>
 $for package, applications in sorted(apps.items()):
     <h3>$package</h3>
+    <form>
     <ul>
     $for application in applications:
-        <li>$application</li>
+        <li>$application <button>Mount</button></li>
     </ul>
+    </form>
 <form action=/apps method=post>
 <p>A valid <a href=https://github.com/angelogladding/web#a-simple-application>application</a> provides one or more <code>web.apps</code> in its <code>setup.py</code>.</p>
 <label>https://github.com/<input type=text name=app></label><br>
