@@ -1,8 +1,17 @@
-$def with (config, status)
+$def with (configs, status, apps)
 <!doctype html>
 <title>Host Admin</title>
 <h1>Host Admin</h1>
-<h2>Configuration</h2>
-<pre>$config</pre>
+<h2>Configurations</h2>
+$for name, config in configs:
+    <h3>$name</h3>
+    <pre>$config</pre>
 <h2>Status</h2>
 <pre>$status</pre>
+<h2>Applications</h2>
+<p>$apps</p>
+<form action=/apps method=post>
+<p>A valid <a href=https://github.com/angelogladding/web#a-simple-application>application</a> provides one or more <code>web.apps</code> in its <code>setup.py</code>.</p>
+<label>https://github.com/<input type=text name=app></label><br>
+<button>Install</button>
+</form>

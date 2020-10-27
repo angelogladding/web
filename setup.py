@@ -32,5 +32,5 @@ setup(requires=["acme_tiny", "BeautifulSoup4", "cssselect", "gevent",
                               "mkdn = mkdn.__main__:main",
                               "mm = mm.__main__:main",
                               "web = web.__main__:main"],
-                "web.apps": ["host = web.hostapp"]},
+                "web.apps": ["host = web:hostapp"]},
       discover=__file__)

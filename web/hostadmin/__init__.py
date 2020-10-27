@@ -1,9 +1,10 @@
 """Host administration app."""
 
 import mm
+import pathlib
 import sh
 
-from ..framework import application
+from ..framework import application, get_apps, form
 
 
 hostapp = application("HostAdmin")
@@ -15,7 +16,20 @@ class Main:
     """Host admin interface."""
 
     def _get(self):
-        with open("/home/webhost/system/etc/supervisor-hostadmin.conf") as fp:
-            config = fp.read()
+        configs = []
+        for config in pathlib.Path("/etc/supervisor/conf.d").glob("*.conf"):
+            with config.open() as fp:
+                configs.append((config.name, fp.read()))
         status = sh.sudo("supervisorctl", "status")
-        return views.main(config, status)
+        apps = get_apps()
+        return views.main(configs, status, apps)
+
+
+@hostapp.route(r"apps")
+class Apps:
+    """Installed web applications."""
+
+    def _post(self):
+        app = form("app").app
+        sh.pip("install", "-e", f"git+https://github.com/{app}.git")
+        return "done"
