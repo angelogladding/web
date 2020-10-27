@@ -16,8 +16,8 @@ $for package, applications in sorted(apps.items()):
     <h3>$package</h3>
     <form>
     <ul>
-    $for appmod, application in applications.items():
-        <li>$appmod $dir(application) <button>Update</button> <button>Mount</button></li>
+    $for application in applications:
+        <li>$application <button>Update</button> <button>Mount</button></li>
     </ul>
     </form>
 <h4>Install new Application</h4>
