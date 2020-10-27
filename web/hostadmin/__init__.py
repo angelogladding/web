@@ -32,6 +32,6 @@ class Apps:
     def _post(self):
         app = form("app").app
         owner, _, name = app.partition("/")
-        sh.pip("install", "-e",
-               f"git+https://github.com/{owner}/{name}.git#egg={name}")
+        sh.sh("runinenv", "system/env", "pip", "install", "-e",
+              f"git+https://github.com/{owner}/{name}.git#egg={name}")
         return "done"
