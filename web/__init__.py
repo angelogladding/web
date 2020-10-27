@@ -36,3 +36,5 @@ __all__ = ["mf", "mm", "template", "pendulum", "indieauth",
            "micropub", "webmention", "websub", "run_queue",
            "Created"]
 __all__ += agent.__all__ + framework.__all__
+
+hostapp = application("HostAdmin")
