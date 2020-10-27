@@ -31,5 +31,7 @@ class Apps:
 
     def _post(self):
         app = form("app").app
-        sh.pip("install", "-e", f"git+https://github.com/{app}.git")
+        owner, _, name = app.partition("/")
+        sh.pip("install", "-e",
+               f"git+https://github.com/{owner}/{name}.git#egg={name}")
         return "done"
