@@ -25,8 +25,8 @@ $for package, applications in sorted(apps.items()):
     <h3>$package</h3>
     <form>
     <ul>
-    $for appns, app in applications:
-        <li>$appns $dir(app)
+    $for appns, app, mod_name, attrs in applications:
+        <li>$appns $app $mod_name $attrs
         <button>Update</button> <button>Mount</button></li>
     </ul>
     </form>
