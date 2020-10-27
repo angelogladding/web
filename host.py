@@ -203,7 +203,7 @@ def spawn_host_admin_app():
     supervisor = configparser.ConfigParser()
     venv = "/home/webhost/system/env"
     command = (f"/home/webhost/runinenv {venv} uwsgi -H {venv} "
-               f"-w web:hostapp --http 0.0.0.0:8080")
+               f"-w web:hostapp --http 0.0.0.0:5555")
     supervisor["program:hostadmin"] = {"autostart": "true",
                                        "command": command,
                                        "directory": "/home/webhost",
