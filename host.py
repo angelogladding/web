@@ -207,7 +207,7 @@ def spawn_host_admin_app():
     supervisor["program:hostadmin"] = {"autostart": "true",
                                        "command": command,
                                        "directory": "/home/webhost",
-                                       "environment": "PYTHONBUFFERED=1",
+                                       "environment": "PYTHONUNBUFFERED=1",
                                        "stopsignal": "INT",
                                        "user": "webhost"}
     hostadmin_conf = etc_dir / "supervisor-hostadmin.conf"
