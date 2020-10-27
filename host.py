@@ -111,6 +111,7 @@ def setup():
     sh.sudo("/etc/init.d/redis-server", "stop")
     sh.sudo("systemctl", "disable", "redis")
 
+    etc_dir.mkdir(parents=True, exist_ok=True)
     src_dir.mkdir(parents=True, exist_ok=True)
 
     def get_python_sh():
