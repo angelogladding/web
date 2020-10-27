@@ -21,6 +21,7 @@
 # TODO tor-browser
 
 import base64
+import configparser
 import functools
 import getpass
 import os
@@ -59,9 +60,10 @@ aptitude_packages = ("build-essential",  # build tools
                      "libenchant-dev",  # pyenchant => sopel => bridging IRC
                      )
 system_dir = pathlib.Path("/home/webhost/system")
-src_dir = system_dir / "src"
 bin_dir = system_dir / "bin"
 env_dir = system_dir / "env"
+etc_dir = system_dir / "etc"
+src_dir = system_dir / "src"
 versions = {"python": "3.9.0", "nginx": "1.18.0", "tor": "0.4.4.5",
             "firefox": "82.0", "geckodriver": "0.27.0"}
 py_pkgs = ("src", "term", "kv", "sql", "web")
@@ -92,7 +94,8 @@ def bootstrap():
 
 def setup():
     """Update the operating system and install core dependencies."""
-    apt = sh.sudo.bake("apt", _env=dict(os.environ, DEBIAN_FRONTEND="noninteractive"))
+    apt = sh.sudo.bake("apt", _env=dict(os.environ,
+                                        DEBIAN_FRONTEND="noninteractive"))
     log("updating")
     apt("update")
     log("upgrading")
@@ -104,7 +107,7 @@ def setup():
             log("  installing", pkg)
             apt("install", "-yq", pkg)
 
-    # Debian automatically starts a redis server, stop and disable it permanently
+    # Debian automatically starts a redis server; disable it permanently
     sh.sudo("/etc/init.d/redis-server", "stop")
     sh.sudo("systemctl", "disable", "redis")
 
@@ -143,6 +146,9 @@ def setup():
                       f"git+https://{ORIGIN}/{py_pkg}.git#egg={py_pkg}")
             except sh.ErrorReturnCode_1 as err:
                 print(err)
+
+    # Spawn administration interface early; supervisor > uwsgi > web.hostapp
+    spawn_host_admin_app()
 
     # Nginx (w/ TLS, HTTPv2, RTMP streaming)
     nginx_dir = f"nginx-{versions['nginx']}"
@@ -190,6 +196,25 @@ def setup():
         sh.ln("-s", src_dir / geckodriver_dir / "geckodriver", bin_dir)
 
     # TODO cleanup src_dir
+
+
+def spawn_host_admin_app():
+    """Instruct supervisor to run web.hostapp with uwsgi."""
+    supervisor = configparser.ConfigParser()
+    venv = "/home/webhost/system/env"
+    command = (f"/home/webhost/runinenv {venv} uwsgi -H {venv} "
+               f"-w web:hostapp --http 0.0.0.0:8080")
+    supervisor["program:hostadmin"] = {"autostart": "true",
+                                       "command": command,
+                                       "directory": "/home/webhost",
+                                       "environment": "PYTHONBUFFERED=1",
+                                       "stopsignal": "INT",
+                                       "user": "webhost"}
+    hostadmin_conf = etc_dir / "supervisor-hostadmin.conf"
+    with hostadmin_conf.open("w") as fp:
+        supervisor.write(fp)
+    sh.sudo("ln", "-sf", hostadmin_conf.resolve(),
+            "/etc/supervisor/conf.d/00_hostadmin.conf")
 
 
 def log(*args, **kwargs):
