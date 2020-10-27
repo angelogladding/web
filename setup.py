@@ -22,7 +22,7 @@ from setuptools import setup
 
 setup(requires=["acme_tiny", "BeautifulSoup4", "cssselect", "gevent",
                 "html5lib", "httpagentparser", "lxml", "mf2py", "mf2util",
-                "networkx", "pendulum", "PIL", "pycrypto", "pyscreenshot",
+                "networkx", "pendulum", "pillow", "pycrypto", "pyscreenshot",
                 "PySocks", "python_mimeparse", "pyvirtualdisplay", "regex",
                 "requests", "selenium", "stem", "unidecode", "uwsgi",
                 "watchdog"],
