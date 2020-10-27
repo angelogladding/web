@@ -16,13 +16,15 @@ class Main:
     """Host admin interface."""
 
     def _get(self):
+        hostname = sh.hostname("--fqdn")
+        ip = sh.hostname("-I").split()[0]
         configs = []
         for config in pathlib.Path("/etc/supervisor/conf.d").glob("*.conf"):
             with config.open() as fp:
                 configs.append((config.name, fp.read()))
         status = sh.sudo("supervisorctl", "status")
         apps = get_apps()
-        return views.main(configs, status, apps)
+        return views.main(hostname, ip, configs, status, apps)
 
 
 @hostapp.route(r"apps")
@@ -34,4 +36,4 @@ class Apps:
         owner, _, name = app.partition("/")
         sh.sh("runinenv", "system/env", "pip", "install", "-e",
               f"git+https://github.com/{owner}/{name}.git#egg={name}")
-        return "done"
+        return "done!"

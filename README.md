@@ -17,7 +17,7 @@ In `simple.py`:
 
 In `setup.py` (requires `angelogladding/src`):
 
-    from setuptools import setup
+    ...
     setup(requires=["web"],
           provides={"web.apps": ["simple:app"]},
           discover=__file__)
