@@ -1,29 +1,45 @@
-$def with (hostname, ip, status, configs, apps)
+$def with (hostname, ip, uptime, status, configs, apps)
 <!doctype html>
+<style>
+body {
+    background-color: #111;
+    margin: 2em; }
+
+</style>
 <title>$hostname</title>
 <header>
-<h1>$hostname</h1>
-<p>$ip</p>
+<h1><code>$hostname</code> <small><code>$ip</code></small></h1>
+<p><code>$uptime</code></p>
 </header>
+
 <h2>Status</h2>
 <pre>$status</pre>
+
 <h2>Configurations</h2>
 $for name, config in configs:
     <h3>$name</h3>
     <pre>$config</pre>
+
 <h2>Applications</h2>
 $for package, applications in sorted(apps.items()):
     <h3>$package</h3>
     <form>
     <ul>
-    $for application in applications:
-        <li>$application <button>Update</button> <button>Mount</button></li>
+    $for appns, app in applications:
+        <li>$appns $dir(app)
+        <button>Update</button> <button>Mount</button></li>
     </ul>
     </form>
-<h4>Install new Application</h4>
+
 <form action=/apps method=post>
-<p><small>A valid <a href=https://github.com/angelogladding/web#a-simple-application>application</a> provides one or more <code>web.apps</code> in its <code>setup.py</code>.</small></p>
+<fieldset>
+<legend>Install Application</legend>
+<p><small>A valid <a
+href=https://github.com/angelogladding/web#a-simple-application>application</a>
+provides one or more <code>web.apps</code> in its
+<code>setup.py</code>.</small></p>
 <label><strong>Application URL</strong><br>
 https://github.com/<input type=text name=app></label><br>
 <button>Install</button>
+</fieldset>
 </form>
