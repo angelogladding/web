@@ -22,7 +22,7 @@ from setuptools import setup
 
 setup(requires=["acme_tiny", "BeautifulSoup4", "cssselect", "gevent",
                 "html5lib", "httpagentparser", "lxml", "mf2py", "mf2util",
-                "pendulum", "pycrypto", "python_mimeparse",
+                "networkx", "pendulum", "pycrypto", "python_mimeparse",
                 "pyvirtualdisplay", "PySocks", "regex", "requests",
                 "selenium", "stem", "unidecode", "uwsgi", "watchdog"],
       provides={"pygments.styles": ["Lunar = solarized:Lunar",
