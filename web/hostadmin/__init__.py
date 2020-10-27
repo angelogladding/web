@@ -24,7 +24,7 @@ class Main:
                 configs.append((config.name, fp.read()))
         status = sh.sudo("supervisorctl", "status")
         apps = get_apps()
-        return views.main(hostname, ip, configs, status, apps)
+        return views.main(hostname, ip, status, configs, apps)
 
 
 @hostapp.route(r"apps")
