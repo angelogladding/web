@@ -3,7 +3,7 @@
 import mm
 import sh
 
-from .framework import application
+from ..framework import application
 
 
 hostapp = application("HostAdmin")
