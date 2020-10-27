@@ -38,3 +38,10 @@ __all__ = ["mf", "mm", "template", "pendulum", "indieauth",
 __all__ += agent.__all__ + framework.__all__
 
 hostapp = application("HostAdmin")
+
+@hostapp.route(r"")
+class Main:
+    """Host admin interface."""
+    
+    def _get(self):
+        return "host admin main page!"
