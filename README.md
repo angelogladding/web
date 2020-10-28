@@ -13,6 +13,7 @@ tools for metamodern web development
 In `simple.py`:
 
     import web
+
     app = web.application("HelloWorld")
 
     @app.route(r"")
