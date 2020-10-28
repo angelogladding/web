@@ -26,6 +26,8 @@ import functools
 import getpass
 import os
 import pathlib
+import random
+import string
 import sys
 import textwrap
 import time
@@ -108,6 +110,7 @@ def setup():
             apt("install", "-yq", pkg)
 
     # Debian automatically starts a redis server; disable it permanently
+    # TODO reuse system redis
     sh.sudo("/etc/init.d/redis-server", "stop")
     sh.sudo("systemctl", "disable", "redis")
 
@@ -218,6 +221,13 @@ def spawn_host_admin_app():
             "/etc/supervisor/conf.d/00_hostadmin.conf")
     sh.sudo("supervisorctl", "reread")
     sh.sudo("supervisorctl", "update")
+    ip = sh.hostname("-I").split()[0]
+    choices = "abcdefghjkmnpqrstuvwxyz23456789"
+    token = "".join([random.choice(choices) for _ in range(10)])
+    with open("token", "w") as fp:
+        fp.write(token)
+    log(f"You may now log in to host administration at: "
+        f"http://{ip}:5555 using token `{token}`...")
 
 
 def log(*args, **kwargs):
