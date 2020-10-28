@@ -37,5 +37,5 @@ class Apps:
         owner, _, name = app.partition("/")
         sh.sh("runinenv", "system/env", "pip", "install", "-e",
               f"git+https://github.com/{owner}/{name}.git#egg={name}")
-        sh.sudo("supervisorctl", "restart", "hostadmin")
+        # TODO FIXME sh.sudo("supervisorctl", "restart", "hostadmin")
         raise SeeOther("/")
