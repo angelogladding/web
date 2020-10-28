@@ -15,7 +15,7 @@ In `simple.py`:
     import web
     app = web.application("Sample")
 
-In `setup.py` (requires `angelogladding/src`):
+In `setup.py` (requires [`angelogladding/src`](https://github.com/angelogladding/src)):
 
     ...
     setup(requires=["web"],
