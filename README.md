@@ -10,7 +10,7 @@ tools for metamodern web development
 
 ## A simple application
 
-In `simple.py`:
+In `hello.py`:
 
     import web
 
@@ -25,5 +25,5 @@ In `setup.py` (requires [`angelogladding/src`](https://github.com/angelogladding
 
     ...
     setup(requires=["web"],
-          provides={"web.apps": ["simple:app"]},
+          provides={"web.apps": ["hello:app"]},
           discover=__file__)
