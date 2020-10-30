@@ -18,8 +18,6 @@
 
 """Bootstrap a web host."""
 
-# TODO tor-browser
-
 import base64
 import configparser
 import functools
@@ -27,7 +25,6 @@ import getpass
 import os
 import pathlib
 import random
-import string
 import sys
 import textwrap
 import time
@@ -49,7 +46,7 @@ aptitude_packages = ("build-essential",  # build tools
                      "libsqlite3-dev",  # SQLite Python extension loading
                      "libssl-dev",  # uWSGI SSL support
                      "libffi-dev",  # (?)
-                     "zlib1g-dev", "python3-dev",  # python
+                     "zlib1g-dev", "python3-dev",  # Python build dependencies
                      "python3-crypto",  # pycrypto
                      "python3-libtorrent",  # libtorrent
                      "ffmpeg",  # a/v en/de[code]
@@ -60,6 +57,14 @@ aptitude_packages = ("build-essential",  # build tools
                      "libgtk-3-0", "libdbus-glib-1-2",  # Firefox
                      "xvfb", "x11-utils",  # browser automation
                      "libenchant-dev",  # pyenchant => sopel => bridging IRC
+                     "ufw",  # an Uncomplicated FireWall
+
+                     "mariadb-server",  # MySQL database
+                     "php-curl", "php-fpm", "php-gd", "php-intl",
+                     "php-mbstring", "php-mysql", "php-soap", "php-xml",
+                     "php-xmlrpc", "php-zip",
+                     # XXX "php-cgi", "php-common", "php-pear", "php-bcmath",
+                     # XXX "php-gettext", "php-net-socket", "php-xml-util",
                      )
 system_dir = pathlib.Path("/home/webhost/system")
 bin_dir = system_dir / "bin"
@@ -72,6 +77,10 @@ py_pkgs = ("src", "term", "kv", "sql", "web")
 
 dhparam_path = system_dir / "nginx/conf/dhparam.pem"
 dhparam_size = "512"  # TODO FIXME revert to "2048" for production!
+
+
+def log(*args, **kwargs):
+    print(f"{int(time.time() - start): 4d}", *args, **kwargs)
 
 
 def bootstrap():
@@ -96,6 +105,34 @@ def bootstrap():
 
 def setup():
     """Update the operating system and install core dependencies."""
+    upgrade_system()
+    setup_firewall()
+
+    # XXX setup_wordpdress()
+
+    # TODO secure_mariadb()
+    # def secure_mariadb():
+    #     sh.sudo("mysql_secure_installation")
+    #     # expect: [enter], n, [enter], [enter], [enter], [enter]
+
+    # XXX sh.sudo("/etc/init.d/redis-server", "stop")
+    # XXX sh.sudo("systemctl", "disable", "redis")
+    etc_dir.mkdir(parents=True, exist_ok=True)
+    src_dir.mkdir(parents=True, exist_ok=True)
+
+    setup_python()
+    spawn_host_admin_app()
+    setup_nginx()
+    setup_tor()
+    setup_firefox()
+    # TODO setup_torbrowser()
+    setup_geckodriver()
+
+    # TODO cleanup src_dir
+
+
+def upgrade_system():
+    """Update and upgrade aptitude, install new system-level dependencies."""
     apt = sh.sudo.bake("apt", _env=dict(os.environ,
                                         DEBIAN_FRONTEND="noninteractive"))
     log("updating")
@@ -109,14 +146,32 @@ def setup():
             log("  installing", pkg)
             apt("install", "-yq", pkg)
 
-    # Debian automatically starts a redis server; disable it permanently
-    # TODO reuse system redis
-    sh.sudo("/etc/init.d/redis-server", "stop")
-    sh.sudo("systemctl", "disable", "redis")
 
-    etc_dir.mkdir(parents=True, exist_ok=True)
-    src_dir.mkdir(parents=True, exist_ok=True)
+def setup_firewall():
+    """."""
+    ufw = sh.sudo.bake("ufw")
+    ufw.allow("proto tcp from any to any port 22")
+    ufw.allow("proto tcp from any to any port 80,443")
+    ufw.allow("proto tcp from any to any port 5555")
+    ufw.enable()
 
+
+def setup_wordpress():
+    sh.sudo("systemctl", "restart", "php7.3-fpm.service")
+
+    # FIXME db passphrase
+    mdb = sh.mariadb.bake("-e")
+    mdb("CREATE DATABASE wordpress"
+        " DEFAULT CHARACTER SET utf8"
+        " COLLATE utf8_unicode_ci")
+    mdb("GRANT ALL ON wordpress.*"
+        " TO 'webhost'@'localhost'"
+        " IDENTIFIED BY 'superstrongpassphrase'")
+    mdb("FLUSH PRIVILEGES")
+
+
+def setup_python():
+    """Install python, a virtual environment and the web package."""
     def get_python_sh():
         py_major_version = f"python{versions['python'].rpartition('.')[0]}"
         return sh.Command(str(bin_dir / py_major_version))
@@ -151,56 +206,6 @@ def setup():
             except sh.ErrorReturnCode_1 as err:
                 print(err)
 
-    # Spawn administration interface early; supervisor > uwsgi > web.hostapp
-    spawn_host_admin_app()
-
-    # Nginx (w/ TLS, HTTPv2, RTMP streaming)
-    nginx_dir = f"nginx-{versions['nginx']}"
-    if not (src_dir / nginx_dir).exists():
-        sh.wget("https://github.com/sergey-dryabzhinsky/nginx-rtmp-module"
-                "/archive/dev.zip", "-O", "nginx-rtmp-module.zip",
-                _cwd=str(src_dir))
-        sh.unzip("-qq", "nginx-rtmp-module.zip", _cwd=str(src_dir))
-        build(f"nginx.org/download/{nginx_dir}.tar.gz",
-              "--with-http_ssl_module", "--with-http_v2_module",
-              f"--add-module={src_dir / 'nginx-rtmp-module-dev'}",
-              f"--prefix={system_dir / 'nginx'}")
-        sh.mkdir("-p", system_dir / "nginx/conf/conf.d")
-        if not dhparam_path.exists():
-            generate_dhparam()
-
-    # Tor
-    tor_dir = f"tor-{versions['tor']}"
-    if not (src_dir / tor_dir).exists():
-        build(f"dist.torproject.org/{tor_dir}.tar.gz",
-              f"--prefix={system_dir}")
-        sh.mkdir("-p", system_dir / "var/tor")
-
-    # Firefox
-    firefox_dir = f"firefox-{versions['firefox']}"
-    if not (src_dir / firefox_dir).exists():
-        log(f"installing firefox-{versions['firefox']}")
-        sh.wget(f"https://archive.mozilla.org/pub/firefox/releases"
-                f"/{versions['firefox']}/linux-x86_64/en-US"
-                f"/{firefox_dir}.tar.bz2", _cwd=str(src_dir))
-        sh.tar("xf", f"{firefox_dir}.tar.bz2", _cwd=str(src_dir))
-        sh.mv("firefox", firefox_dir, _cwd=str(src_dir))
-        sh.ln("-s", src_dir / firefox_dir / "firefox", bin_dir)
-
-    # Geckodriver
-    geckodriver_dir = f"geckodriver-v{versions['geckodriver']}-linux64"
-    if not (src_dir / geckodriver_dir).exists():
-        log(f"installing geckodriver-{versions['geckodriver']}")
-        sh.wget(f"https://github.com/mozilla/geckodriver/releases/download"
-                f"/v{versions['geckodriver']}/{geckodriver_dir}.tar.gz",
-                _cwd=str(src_dir))
-        sh.tar("xf", f"{geckodriver_dir}.tar.gz", _cwd=str(src_dir))
-        sh.mkdir("-p", geckodriver_dir, _cwd=str(src_dir))
-        sh.mv("geckodriver", geckodriver_dir, _cwd=str(src_dir))
-        sh.ln("-s", src_dir / geckodriver_dir / "geckodriver", bin_dir)
-
-    # TODO cleanup src_dir
-
 
 def spawn_host_admin_app():
     """Instruct supervisor to run web.hostapp with uwsgi."""
@@ -222,16 +227,68 @@ def spawn_host_admin_app():
     sh.sudo("supervisorctl", "reread")
     sh.sudo("supervisorctl", "update")
     ip = sh.hostname("-I").split()[0]
-    choices = "abcdefghjkmnpqrstuvwxyz23456789"
-    token = "".join([random.choice(choices) for _ in range(10)])
+    token = "".join(random.choice("abcdefghjkmnpqrstuvwxyz23456789")
+                    for _ in range(10))
     with open("token", "w") as fp:
         fp.write(token)
     log(f"You may now log in to host administration at: "
         f"http://{ip}:5555 using token `{token}`...")
 
 
-def log(*args, **kwargs):
-    print(f"{int(time.time() - start): 4d}", *args, **kwargs)
+def setup_nginx():
+    """Nginx (w/ TLS, HTTPv2, RTMP streaming) for web serving."""
+    nginx_dir = f"nginx-{versions['nginx']}"
+    if (src_dir / nginx_dir).exists():
+        return
+    sh.wget("https://github.com/sergey-dryabzhinsky/nginx-rtmp-module/archive/"
+            "dev.zip", "-O", "nginx-rtmp-module.zip", _cwd=str(src_dir))
+    sh.unzip("-qq", "nginx-rtmp-module.zip", _cwd=str(src_dir))
+    build(f"nginx.org/download/{nginx_dir}.tar.gz",
+          "--with-http_ssl_module", "--with-http_v2_module",
+          f"--add-module={src_dir / 'nginx-rtmp-module-dev'}",
+          f"--prefix={system_dir / 'nginx'}")
+    sh.mkdir("-p", system_dir / "nginx/conf/conf.d")
+    if not dhparam_path.exists():
+        generate_dhparam()
+
+
+def setup_tor():
+    """Tor for anonymous hosting."""
+    tor_dir = f"tor-{versions['tor']}"
+    if (src_dir / tor_dir).exists():
+        return
+    build(f"dist.torproject.org/{tor_dir}.tar.gz",
+          f"--prefix={system_dir}")
+    sh.mkdir("-p", system_dir / "var/tor")
+
+
+def setup_firefox():
+    """."""
+    firefox_dir = f"firefox-{versions['firefox']}"
+    if (src_dir / firefox_dir).exists():
+        return
+    log(f"installing firefox-{versions['firefox']}")
+    sh.wget(f"https://archive.mozilla.org/pub/firefox/releases"
+            f"/{versions['firefox']}/linux-x86_64/en-US"
+            f"/{firefox_dir}.tar.bz2", _cwd=str(src_dir))
+    sh.tar("xf", f"{firefox_dir}.tar.bz2", _cwd=str(src_dir))
+    sh.mv("firefox", firefox_dir, _cwd=str(src_dir))
+    sh.ln("-s", src_dir / firefox_dir / "firefox", bin_dir)
+
+
+def setup_geckodriver():
+    """."""
+    geckodriver_dir = f"geckodriver-v{versions['geckodriver']}-linux64"
+    if (src_dir / geckodriver_dir).exists():
+        return
+    log(f"installing geckodriver-{versions['geckodriver']}")
+    sh.wget(f"https://github.com/mozilla/geckodriver/releases/download"
+            f"/v{versions['geckodriver']}/{geckodriver_dir}.tar.gz",
+            _cwd=str(src_dir))
+    sh.tar("xf", f"{geckodriver_dir}.tar.gz", _cwd=str(src_dir))
+    sh.mkdir("-p", geckodriver_dir, _cwd=str(src_dir))
+    sh.mv("geckodriver", geckodriver_dir, _cwd=str(src_dir))
+    sh.ln("-s", src_dir / geckodriver_dir / "geckodriver", bin_dir)
 
 
 def build(archive_url, *config_args):
@@ -271,7 +328,7 @@ def generate_dhparam():
 
 
 def main():
-    # TODO test if in respective home directories
+    # TODO enforce that user is in respective home directory
     user = getpass.getuser()
     if user == "root":
         bootstrap()
