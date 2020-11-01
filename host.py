@@ -149,11 +149,11 @@ def upgrade_system():
 
 def setup_firewall():
     """Wall off everything but SSH and web."""
-    ufw = sh.sudo.bake("ufw", "allow", "proto", "tcp", "from", "any", "to", "any")
-    ufw.port("22")
-    ufw.port("80,443")
-    ufw.port("5555")  # TODO move to :80/x2iu49e7f
-    ufw.enable()
+    allow = sh.sudo.bake("ufw", "allow", "proto", "tcp", "from", "any", "to", "any")
+    allow.port("22")
+    allow.port("80,443")
+    allow.port("5555")  # TODO move to :80/x2iu49e7f
+    sh.sudo("ufw", "enable")
 
 
 def setup_wordpress():
