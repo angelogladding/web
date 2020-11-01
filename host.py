@@ -152,7 +152,7 @@ def setup_firewall():
     ufw = sh.sudo.bake("ufw", "allow", "proto", "tcp", "from", "any", "to", "any")
     ufw.port("22")
     ufw.port("80,443")
-    ufw.port("5555)  # TODO move to :80/x2iu49e7f
+    ufw.port("5555")  # TODO move to :80/x2iu49e7f
     ufw.enable()
 
 
