@@ -153,7 +153,7 @@ def setup_firewall():
     allow.port("22")
     allow.port("80,443")
     allow.port("5555")  # TODO move to :80/x2iu49e7f
-    sh.sudo("ufw", "enable")
+    sh.sudo("ufw", "--force", "enable")
 
 
 def setup_wordpress():
