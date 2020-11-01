@@ -148,11 +148,11 @@ def upgrade_system():
 
 
 def setup_firewall():
-    """."""
-    ufw = sh.sudo.bake("ufw")
-    ufw.allow("proto tcp from any to any port 22")
-    ufw.allow("proto tcp from any to any port 80,443")
-    ufw.allow("proto tcp from any to any port 5555")
+    """Wall off everything but SSH and web."""
+    ufw = sh.sudo.bake("ufw", "allow", "proto", "tcp", "from", "any", "to", "any")
+    ufw.port("22")
+    ufw.port("80,443")
+    ufw.port("5555)  # TODO move to :80/x2iu49e7f
     ufw.enable()
 
 
