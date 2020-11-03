@@ -25,7 +25,6 @@ from .framework.indieweb import indieauth
 from .framework.indieweb import micropub
 from .framework.indieweb import webmention
 from .framework.indieweb import websub
-from .hostadmin import hostapp
 from .response import (Status,  # noqa
                        OK, Created, Accepted, NoContent, MultiStatus,
                        Found, SeeOther, PermanentRedirect,
