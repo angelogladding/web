@@ -79,7 +79,7 @@ __all__ = ["application", "serve", "anti_csrf", "form", "secure_form",
            "get_integrity_factory", "utcnow", "JSONEncoder",
            "default_session_timeout", "uwsgi", "textslug", "get_host_hash",
            "config_servers", "b64encode", "b64decode", "timeslug",
-           "enqueue", "run_redis", "kill_redis"]
+           "enqueue", "run_redis", "kill_redis", "get_apps"]
 
 kvdb = kv.db("web", ":", {"auth:secret": "string",
                           "auth:nonces": "set",

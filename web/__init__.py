@@ -21,10 +21,10 @@ from . import agent
 from .agent import *  # noqa
 from . import framework
 from .framework import *  # noqa
-from .framework.indieweb import indieauth
-from .framework.indieweb import micropub
-from .framework.indieweb import webmention
-from .framework.indieweb import websub
+# XXX from .framework.indieweb import indieauth
+# XXX from .framework.indieweb import micropub
+# XXX from .framework.indieweb import webmention
+# XXX from .framework.indieweb import websub
 from .response import (Status,  # noqa
                        OK, Created, Accepted, NoContent, MultiStatus,
                        Found, SeeOther, PermanentRedirect,
