@@ -1,7 +1,7 @@
 # web
 tools for metamodern web development
 
-## A simple webapp
+## A simple application
 
 In `hello.py`:
 
