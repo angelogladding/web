@@ -20,12 +20,12 @@
 
 from setuptools import setup
 
-setup(requires=["acme_tiny", "BeautifulSoup4", "cssselect", "gevent",
-                "html5lib", "httpagentparser", "lxml", "mf2py", "mf2util",
-                "networkx", "pendulum", "pillow", "pycrypto", "pyscreenshot",
-                "PySocks", "python_mimeparse", "pyvirtualdisplay", "regex",
-                "requests", "selenium", "stem", "unidecode", "uwsgi",
-                "watchdog"],
+setup(requires=["acme_tiny", "BeautifulSoup4", "cssselect", "dnspython",
+                "gevent", "html5lib", "httpagentparser", "lxml", "mf2py",
+                "mf2util", "networkx", "pendulum", "pillow", "pycrypto",
+                "pyscreenshot", "PySocks", "python_mimeparse",
+                "pyvirtualdisplay", "regex", "requests", "selenium", "stem",
+                "unidecode", "uwsgi", "watchdog"],
       provides={"pygments.styles": ["Lunar = solarized:Lunar",
                                     "Solar = solarized:Solar"],
                 "term.apps": ["mf = mf.__main__:main",
