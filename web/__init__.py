@@ -15,6 +15,7 @@ Simple interface, simple deploy.
 import mf
 import mm
 from mm import Template as template  # noqa
+from mm import templates  # noqa
 import pendulum  # TODO XXX
 
 from . import agent
@@ -32,6 +33,7 @@ from .response import (Status,  # noqa
                          MethodNotAllowed, Conflict, Gone)
 from .tasks import run_queue
 
-__all__ = ["mf", "mm", "template", "pendulum", "indieauth", "micropub",
-           "webmention", "websub", "run_queue", "hostapp", "Created"]
+__all__ = ["mf", "mm", "template", "templates", "pendulum", "indieauth",
+           "micropub", "webmention", "websub", "run_queue", "hostapp",
+           "Created"]
 __all__ += agent.__all__ + framework.__all__
