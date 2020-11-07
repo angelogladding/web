@@ -1,21 +1,44 @@
+"""Read and write Nginx configuration files."""
+
+# Released under an MIT license by Fatih Erikli (fatiherikli.github.io)
+
 import string
 
-from pyparsing import (
-    Literal, White, Word, alphanums, CharsNotIn, Forward, Group, SkipTo,
-    Optional, OneOrMore, ZeroOrMore, pythonStyleComment)
+from pyparsing import Literal, White, Word, CharsNotIn, Forward, Group, SkipTo
+from pyparsing import Optional, OneOrMore, ZeroOrMore, pythonStyleComment
+
+__all__ = ["dump", "dumps", "load", "loads"]
+
+
+def dump(blocks, _file, indentation=4):
+    """."""
+    return NginxDumper(blocks, indentation).to_file(_file)
+
+
+def dumps(blocks, indentation=4):
+    """."""
+    return NginxDumper(blocks, indentation).as_string()
+
+
+def load(_file):
+    """."""
+    return loads(_file.read())
+
+
+def loads(source):
+    """."""
+    return NginxParser(source).as_list()
 
 
 class NginxParser(object):
-    """
-    A class that parses nginx configuration with pyparsing
-    """
+    """A class that parses nginx configuration with pyparsing."""
 
     # constants
     left_bracket = Literal("{").suppress()
     right_bracket = Literal("}").suppress()
     semicolon = Literal(";").suppress()
     space = White().suppress()
-    key = Word(alphanums + "_/")
+    key = Word(string.ascii_letters + string.digits + "_/")
     value = CharsNotIn("{};")
     value2 = CharsNotIn(";")
     location = CharsNotIn("{};," + string.whitespace)
@@ -54,30 +77,23 @@ class NginxParser(object):
         self.source = source
 
     def parse(self):
-        """
-        Returns the parsed tree.
-        """
+        """Return the parsed tree."""
         return self.script.parseString(self.source)
 
     def as_list(self):
-        """
-        Returns the list of tree.
-        """
+        """Return the list of tree."""
         return self.parse().asList()
 
 
 class NginxDumper(object):
-    """
-    A class that dumps nginx configuration from the provided tree.
-    """
+    """A class that dumps nginx configuration from the provided tree."""
+
     def __init__(self, blocks, indentation=4):
         self.blocks = blocks
         self.indentation = indentation
 
     def __iter__(self, blocks=None, current_indent=0, spacer=' '):
-        """
-        Iterates the dumped nginx content.
-        """
+        """Iterate the dumped nginx content."""
         blocks = blocks or self.blocks
         for key, values in blocks:
             if current_indent:
@@ -109,22 +125,3 @@ class NginxDumper(object):
             out.write(line+"\n")
         out.close()
         return out
-
-
-# Shortcut functions to respect Python's serialization interface
-# (like pyyaml, picker or json)
-
-def loads(source):
-    return NginxParser(source).as_list()
-
-
-def load(_file):
-    return loads(_file.read())
-
-
-def dumps(blocks, indentation=4):
-    return NginxDumper(blocks, indentation).as_string()
-
-
-def dump(blocks, _file, indentation=4):
-    return NginxDumper(blocks, indentation).to_file(_file)
