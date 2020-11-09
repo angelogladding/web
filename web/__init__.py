@@ -17,15 +17,13 @@ import mm
 from mm import Template as template  # noqa
 from mm import templates  # noqa
 import pendulum  # TODO XXX
+from requests.exceptions import ConnectionError
 
 from . import agent
 from .agent import *  # noqa
 from . import framework
 from .framework import *  # noqa
-# XXX from .framework.indieweb import indieauth
-# XXX from .framework.indieweb import micropub
-# XXX from .framework.indieweb import webmention
-# XXX from .framework.indieweb import websub
+from .indie import *  # noqa
 from .response import (Status,  # noqa
                        OK, Created, Accepted, NoContent, MultiStatus,
                        Found, SeeOther, PermanentRedirect,
@@ -34,6 +32,6 @@ from .response import (Status,  # noqa
 from .tasks import run_queue
 
 __all__ = ["mf", "mm", "template", "templates", "pendulum", "indieauth",
-           "micropub", "webmention", "websub", "run_queue", "hostapp",
-           "Created"]
+           "micropub", "microsub", "webmention", "websub", "run_queue",
+           "hostapp", "Created", "ConnectionError"]
 __all__ += agent.__all__ + framework.__all__

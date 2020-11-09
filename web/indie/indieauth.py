@@ -101,16 +101,19 @@ class SignIn:
                                <title>Sign in to $host</title>
                                <body>
                                <form>
-                               <input name=url>
+                               <input name=me>
                                <button>Sign In</button>
                                </form>""")
 
     def _get(self):
         try:
-            user_url = web.form("url").url
+            user_url = web.form("me").me
         except web.BadRequest:
             return self.template(web.tx.host.name)
-        rels = web.get(user_url).mf2json["rels"]
+        try:
+            rels = web.get(user_url).mf2json["rels"]
+        except web.ConnectionError:
+            return f"can't reach https://{user_url}"
         auth = web.uri.parse(rels["authorization_endpoint"][0])
         web.tx.user.session["auth_endpoint"] = str(auth)
         client_id = web.uri.parse(f"http://{web.tx.host.name}"
