@@ -3,7 +3,7 @@
 import web
 
 
-reader = web.application("MicrosubClient", mount_prefix="reader")
+reader = web.application("MicrosubReader", mount_prefix="reader")
 server = web.application("MicrosubServer", mount_prefix="microsub")
 
 
