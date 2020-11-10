@@ -3,11 +3,11 @@
 import web
 
 
-client = web.application("MicrosubClient", mount_prefix="reader")
+reader = web.application("MicrosubClient", mount_prefix="reader")
 server = web.application("MicrosubServer", mount_prefix="microsub")
 
 
-@server.route(r"")
+@reader.route(r"")
 class Reader:
     """."""
 
