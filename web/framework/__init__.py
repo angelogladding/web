@@ -289,6 +289,13 @@ def get_apps():
     return apps
 
 
+def get_app(object_reference):
+    """"""
+    for ep in pkg_resources.iter_entry_points("web.apps"):
+        if f"{ep.module_name}:{ep.attrs[0]}" == object_reference:
+            return ep.name, ep.handler
+
+
 def header(name, value, add=False):
     """"""
     if add:
