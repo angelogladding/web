@@ -12,6 +12,7 @@ Simple interface, simple deploy.
 """
 
 # TODO clean these up
+from hstspreload import in_hsts_preload
 import mf
 import mm
 from mm import Template as template  # noqa
@@ -31,7 +32,7 @@ from .response import (Status,  # noqa
                          MethodNotAllowed, Conflict, Gone)
 from .tasks import run_queue
 
-__all__ = ["mf", "mm", "template", "templates", "pendulum", "indieauth",
-           "micropub", "microsub", "webmention", "websub", "run_queue",
-           "hostapp", "Created", "ConnectionError"]
+__all__ = ["in_hsts_preload", "mf", "mm", "template", "templates", "pendulum",
+           "indieauth", "micropub", "microsub", "webmention", "websub",
+           "run_queue", "hostapp", "Created", "ConnectionError"]
 __all__ += agent.__all__ + framework.__all__
