@@ -289,10 +289,9 @@ def get_apps():
             raw_meta = ep.dist.get_metadata("PKG-INFO")
         except FileNotFoundError:
             raw_meta = ep.dist.get_metadata("METADATA").partition("\n\n")[0]
-        metadata = dict(line.partition(": ")[0::2]
-                        for line in raw_meta.splitlines())
-        apps[ep.dist, metadata].append((ep.name, handler,
-                                        ep.module_name, ep.attrs))
+        ep.dist.metadata = dict(line.partition(": ")[0::2]
+                                for line in raw_meta.splitlines())
+        apps[ep.dist].append((ep.name, handler, ep.module_name, ep.attrs))
     return apps
 
 
