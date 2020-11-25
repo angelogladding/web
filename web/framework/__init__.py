@@ -285,7 +285,14 @@ def get_apps():
     apps = collections.defaultdict(list)
     for ep in pkg_resources.iter_entry_points("web.apps"):
         handler = ep.load()
-        apps[ep.dist].append((ep.name, handler, ep.module_name, ep.attrs))
+        try:
+            raw_meta = ep.dist.get_metadata("PKG-INFO")
+        except FileNotFoundError:
+            raw_meta = ep.dist.get_metadata("METADATA").partition("\n\n")[0]
+        metadata = dict(line.partition(": ")[0::2]
+                        for line in raw_meta.splitlines())
+        apps[ep.dist].append((ep.name, handler, metadata,
+                              ep.module_name, ep.attrs))
     return apps
 
 

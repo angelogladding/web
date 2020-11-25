@@ -4,13 +4,11 @@ import acme_tiny
 import sh
 
 
-def generate_host_cert(domain, cert_dir):
+def generate_host_cert(domain, cert_dir, challenge_dir):
     """Generate a TLS certificate signed by Let's Encrypt for given domain."""
     account_key = cert_dir / "account.key"
     if not account_key.exists():
         sh.openssl("genrsa", "4096", _out=str(account_key))
-    challenge_dir = cert_dir / "challenges"
-    challenge_dir.mkdir(exist_ok=True)
     private_key = cert_dir / "domain.key"
     if not private_key.exists():
         sh.openssl("genrsa", "4096", _out=str(private_key))
