@@ -34,5 +34,5 @@ from .tasks import run_queue
 
 __all__ = ["in_hsts_preload", "mf", "mm", "template", "templates", "pendulum",
            "indieauth", "micropub", "microsub", "webmention", "websub",
-           "run_queue", "hostapp", "Created", "ConnectionError"]
+           "run_queue", "generate_host_cert", "Created", "ConnectionError"]
 __all__ += agent.__all__ + framework.__all__
