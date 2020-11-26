@@ -63,7 +63,7 @@ from ..response import (Status,  # noqa
                         Found, SeeOther, PermanentRedirect,
                         BadRequest, Unauthorized, Forbidden, NotFound,
                           MethodNotAllowed, Conflict, Gone)
-from . import letsencrypt
+from .letsencrypt import generate_cert
 from .newmath import nbencode, nbdecode, nbrandom, nb60_re
 
 import warnings  # mf2py's beautifulsoup's unspecified parser -- force lxml?
@@ -75,7 +75,7 @@ __all__ = ["application", "serve", "anti_csrf", "form", "secure_form",
            "get_nonce", "get_token", "best_match", "sessions",
            "require_auth", "tx", "uri", "kv", "header",
            "Application", "Resource", "nbencode", "nbdecode", "nbrandom",
-           "Template", "config_templates", "letsencrypt",
+           "Template", "config_templates", "generate_cert",
            "get_integrity_factory", "utcnow", "JSONEncoder",
            "default_session_timeout", "uwsgi", "textslug", "get_host_hash",
            "config_servers", "b64encode", "b64decode", "timeslug",
