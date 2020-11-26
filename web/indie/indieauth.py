@@ -110,6 +110,7 @@ class SignIn:
             user_url = web.form("me").me
         except web.BadRequest:
             return self.template(web.tx.host.name)
+        print(user_url)
         try:
             rels = web.get(user_url).mf2json["rels"]
         except web.ConnectionError:
