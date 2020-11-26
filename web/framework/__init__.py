@@ -658,7 +658,7 @@ class Application:
 
     """
 
-    def __init__(self, name, *wrappers, host=None, icon=None, sessions=False,
+    def __init__(self, name, *wrappers, host=None, icon=None, sessions=True,
                  serve=False, **path_args):
         self.name = name
         self.wrappers = []
