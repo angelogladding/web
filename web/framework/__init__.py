@@ -30,15 +30,11 @@ import secrets
 import shutil
 import signal
 import sys
-# import threading  NOTE see below
 import time
 import urllib
 import wsgiref.util
 
 import Crypto.Random.random
-import gevent
-import gevent.pywsgi
-from gevent import local
 import kv
 import lxml
 import lxml.html
@@ -51,8 +47,11 @@ import unidecode
 import uri
 try:
     import uwsgi
-except ImportError:  # outside of a `uwsgi` context; websockets disabled
-    uwsgi = None
+    import threading
+except ImportError:  # outside of a `uwsgi` context
+    import gevent
+    import gevent.pywsgi
+    from gevent import local
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
@@ -1044,8 +1043,13 @@ class Application:
         return handler
 
 
-# FIXME class Context(threading.local):
-class Context(local.local):
+if uwsgi:
+    thread_local = threading.local
+else:
+    thread_local = local.local
+
+
+class Context(thread_local):
 
     # TODO still needed?
 
@@ -1362,3 +1366,6 @@ def get_job_signature(callable, *args, **kwargs):
                                         vals=[_module, _object,
                                               arghash])[0]["rowid"]
     return job_signature_id
+
+
+# TODO gevent websockets
