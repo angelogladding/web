@@ -52,6 +52,7 @@ except ImportError:  # outside of a `uwsgi` context
     import gevent
     import gevent.pywsgi
     from gevent import local
+    uwsgi = None
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
