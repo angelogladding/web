@@ -34,9 +34,9 @@ def insert_references(handler, app):
                                  mention_id TEXT, data JSON,
                                  source_url TEXT, target_url TEXT""")
     yield
-    print(type(web.tx.response.body))
-    print(web.tx.response.body)
     doc = web.parse(web.tx.response.body)
+    print(doc)
+    print(dir(doc))
     try:
         head = doc.select("head")[0]
     except IndexError:
