@@ -35,8 +35,7 @@ def insert_references(handler, app):
                                  source_url TEXT, target_url TEXT""")
     yield
     doc = web.parse(web.tx.response.body)
-    print(doc)
-    print(dir(doc))
+    print(doc.html)
     try:
         head = doc.select("head")[0]
     except IndexError:
