@@ -20,10 +20,14 @@ def insert_references(handler, app):
     yield
     if web.tx.request.uri.path == "":
         doc = web.parse(web.tx.response.body)
-        head = doc.select("head")[0]
-        head.append("<link rel=authorization_endpoint href=/auth>",
-                    "<link rel=token_endpoint href=/auth/token>")
-        web.tx.response.body = doc.html
+        try:
+            head = doc.select("head")[0]
+        except IndexError:
+            pass
+        else:
+            head.append("<link rel=authorization_endpoint href=/auth>",
+                        "<link rel=token_endpoint href=/auth/token>")
+            web.tx.response.body = doc.html
 
 
 def get_client(client_id):
