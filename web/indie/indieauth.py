@@ -3,6 +3,7 @@
 import json
 
 import web
+from web import tx
 from web.agent import unapply_dns
 
 
@@ -13,13 +14,13 @@ client = web.application("IndieAuthClient", mount_prefix="sign-in")
 # @server.wrap  # TODO include subapp wrappers
 def insert_references(handler, app):
     """Ensure server links are in head of root document."""
-    web.tx.db.define(auths="""received DATETIME NOT NULL DEFAULT
-                                CURRENT_TIMESTAMP,
-                              mention_id TEXT, data JSON,
-                              source_url TEXT, target_url TEXT""")
+    tx.db.define(auths="""received DATETIME NOT NULL DEFAULT
+                              CURRENT_TIMESTAMP,
+                          mention_id TEXT, data JSON,
+                          source_url TEXT, target_url TEXT""")
     yield
-    if web.tx.request.uri.path == "":
-        doc = web.parse(web.tx.response.body)
+    if tx.request.uri.path == "":
+        doc = web.parse(tx.response.body)
         try:
             head = doc.select("head")[0]
         except IndexError:
@@ -27,7 +28,7 @@ def insert_references(handler, app):
         else:
             head.append("<link rel=authorization_endpoint href=/auth>",
                         "<link rel=token_endpoint href=/auth/token>")
-            web.tx.response.body = doc.html
+            tx.response.body = doc.html
 
 
 def get_client(client_id):
@@ -60,20 +61,21 @@ class AuthenticationEndpoint:
         else:
             name = "Unknown"
         identifier = web.uri.parse(unapply_dns(client_url)).minimized
-        # XXX web.tx.user.session["client_id"] = form.client_id
-        web.tx.user.session["redirect_uri"] = form.redirect_uri
-        web.tx.user.session["state"] = form.state
+        # XXX tx.user.session["client_id"] = form.client_id
+        print(tx.user.session)
+        tx.user.session["redirect_uri"] = form.redirect_uri
+        tx.user.session["state"] = form.state
         return self.template(name, identifier, form.scope)
 
     def _post(self):
-        callback = web.uri.parse(web.tx.user.session["redirect_uri"])
-        # XXX callback["client_id"] = web.tx.user.session["client_id"]
-        # XXX callback["redirect_uri"] = web.tx.user.session["redirect_uri"]
-        callback["state"] = web.tx.user.session["state"]
+        callback = web.uri.parse(tx.user.session["redirect_uri"])
+        # XXX callback["client_id"] = tx.user.session["client_id"]
+        # XXX callback["redirect_uri"] = tx.user.session["redirect_uri"]
+        callback["state"] = tx.user.session["state"]
         code = web.nbrandom(10)
         callback["code"] = code
         # TODO use sql
-        # XXX web.tx.kv["codes"][web.tx.user.session["client_id"]] = code
+        # XXX tx.kv["codes"][tx.user.session["client_id"]] = code
         raise web.Found(callback)
 
 
@@ -84,12 +86,12 @@ class TokenEndpoint:
     def _post(self):
         form = web.form("me", "code", "grant_type",
                         "client_id", "redirect_uri")
-        if form.code != web.tx.kv["codes"][form.client_id]:
+        if form.code != tx.kv["codes"][form.client_id]:
             return "nope"
         token = web.nbrandom(10)
         web.header("Content-Type", "application/json")
         return json.dumps({"access_token": token, "scope": "draft",
-                           "me": "https://{}".format(web.tx.host.name)})
+                           "me": "https://{}".format(tx.host.name)})
 
 
 # Client
@@ -111,15 +113,15 @@ class SignIn:
         try:
             user_url = web.form("me").me
         except web.BadRequest:
-            return self.template(web.tx.host.name)
+            return self.template(tx.host.name)
         try:
             rels = web.get(user_url).mf2json["rels"]
         except web.ConnectionError:
             return f"can't reach https://{user_url}"
         auth = web.uri.parse(rels["authorization_endpoint"][0])
-        web.tx.user.session["auth_endpoint"] = str(auth)
-        client_id = web.uri.parse(f"http://{web.tx.host.name}"
-                                  f":{web.tx.host.port}")
+        tx.user.session["auth_endpoint"] = str(auth)
+        client_id = web.uri.parse(f"http://{tx.host.name}"
+                                  f":{tx.host.port}")
         auth["me"] = user_url
         auth["client_id"] = client_id
         auth["redirect_uri"] = client_id / "sign-in/auth"
@@ -137,7 +139,7 @@ class Authorize:
         # form = web.form("state", "code")
         # verify state
         # request token from token_endpoint using `code`
-        web.tx.user.session["me"] = "http://alice.example"
+        tx.user.session["me"] = "http://alice.example"
         # TODO return_to="/"
         raise web.SeeOther("/")
 
