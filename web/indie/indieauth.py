@@ -39,9 +39,8 @@ class AuthenticationEndpoint:
     """An IndieAuth server's `authentication endpoint`."""
 
     template = web.template("""$def with (name, identifier, scope)
-                               <!doctype html>
-                               <title>Sign in to $name?</title>
-                               <body>
+                               $var title: Sign in to $name?
+
                                <form method=post>
                                <p>Sign in to $name at $identifier with
                                $scope scope?</p>
