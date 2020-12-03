@@ -68,6 +68,7 @@ class AuthenticationEndpoint:
         return self.template(name, identifier, form.scope)
 
     def _post(self):
+        print(tx.user.session)
         callback = web.uri.parse(tx.user.session["redirect_uri"])
         # XXX callback["client_id"] = tx.user.session["client_id"]
         # XXX callback["redirect_uri"] = tx.user.session["redirect_uri"]
