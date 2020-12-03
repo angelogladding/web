@@ -100,9 +100,8 @@ class SignIn:
     """An IndieAuth client's `sign-in form`."""
 
     template = web.template("""$def with (host)
-                               <!doctype html>
-                               <title>Sign in to $host</title>
-                               <body>
+                               $var title: Sign in to $host
+
                                <form>
                                <input name=me>
                                <button>Sign In</button>
