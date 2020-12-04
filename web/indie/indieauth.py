@@ -43,12 +43,11 @@ class AuthenticationEndpoint:
                                $var title: Sign in to $name?
 
                                <form method=post>
-                               <p>Sign in to $name at $identifier\
+                               <p>Sign in to $name at $identifier?</p>
                                $if scope:
-                                    with $scope scope\
-                               ?</p>
+                                   <p>Scope: $scope</p>
                                <button>Sign In</button>
-                               <button>Block</button>
+                               <button>Block & Report</button>
                                </form>""")
 
     def _get(self):
