@@ -43,8 +43,10 @@ class AuthenticationEndpoint:
                                $var title: Sign in to $name?
 
                                <form method=post>
-                               <p>Sign in to $name at $identifier with
-                               $scope scope?</p>
+                               <p>Sign in to $name at $identifier\
+                               $if scope:
+                                    with $scope scope\
+                               ?</p>
                                <button>Sign In</button>
                                <button>Block</button>
                                </form>""")
@@ -62,17 +64,17 @@ class AuthenticationEndpoint:
             name = "Unknown"
         identifier = web.uri.parse(unapply_dns(client_url)).minimized
         # XXX tx.user.session["client_id"] = form.client_id
-        print(tx.user.session)
         tx.user.session["redirect_uri"] = form.redirect_uri
         tx.user.session["state"] = form.state
         return self.template(name, identifier, form.scope)
 
     def _post(self):
-        print(tx.user.session)
-        callback = web.uri.parse(tx.user.session["redirect_uri"])
-        # XXX callback["client_id"] = tx.user.session["client_id"]
-        # XXX callback["redirect_uri"] = tx.user.session["redirect_uri"]
-        callback["state"] = tx.user.session["state"]
+        form = web.form("response_type", "redirect_uri", "client_id",
+                        "state", "code_challenge", "code_challenge_method")
+        callback = web.uri.parse(form["redirect_uri"])
+        # XXX callback["client_id"] = form["client_id"]
+        # XXX callback["redirect_uri"] = form["redirect_uri"]
+        callback["state"] = form["state"]
         code = web.nbrandom(10)
         callback["code"] = code
         # TODO use sql
