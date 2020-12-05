@@ -68,10 +68,6 @@ class AuthenticationEndpoint:
         return self.template(name, identifier, form.scope, tx.request.uri.path)
 
     def _post(self):
-        print()
-        print("  session:", tx.user.session)
-        print("  form:", web.form())
-        print()
         try:
             web.form("code", "client_id", "redirect_uri", "code_verifier")
         except web.BadRequest:
@@ -86,7 +82,6 @@ class AuthenticationEndpoint:
         callback["state"] = tx.user.session["state"]
         code = web.nbrandom(10)
         callback["code"] = code
-        print("  code:", code)
         # TODO use sql
         # XXX tx.kv["codes"][tx.user.session["client_id"]] = code
         raise web.Found(callback)
