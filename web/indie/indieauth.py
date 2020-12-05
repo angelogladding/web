@@ -68,7 +68,8 @@ class AuthenticationEndpoint:
         return self.template(name, identifier, form.scope, tx.request.uri.path)
 
     def _post(self):
-        print(tx.user.session)
+        print("  session:", tx.user.session)
+        print("  form:", web.form())
         try:
             form = web.form("grant_type")
             if form.grant_type == "authorization_code":
