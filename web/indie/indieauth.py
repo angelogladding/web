@@ -69,19 +69,24 @@ class AuthenticationEndpoint:
 
     def _post(self):
         print(tx.user.session)
-        # grant_type=authorization_code
-        # code - The authorization code received from the authorization endpoint in the redirect.
-        # client_id - The client's URL, which MUST match the client_id used in the authentication request.
-        # redirect_uri - The client's redirect URL, which MUST match the initial authentication request.
-        # code_verifier - The original plaintext random string generated before starting the authorization request.
-        form = web.form("response_type", "redirect_uri", "client_id",
-                        "state", "code_challenge", "code_challenge_method")
-        callback = web.uri.parse(form["redirect_uri"])
+        try:
+            web.form("grant_type", "code", "client_id",
+                     "redirect_uri", "code_verifier")
+            # TODO perform checks:
+            #      https://indieauth.spec.indieweb.org/#profile-url-response
+            web.header("Content-Type", "application/json")
+            return json.dumps({"me": tx.request.uri.host})
+        except web.BadRequest:
+            pass
+        # form = web.form("response_type", "redirect_uri", "client_id",
+        #                 "state", "code_challenge", "code_challenge_method")
+        callback = web.uri.parse(tx.user.session["redirect_uri"])
         # XXX callback["client_id"] = form["client_id"]
         # XXX callback["redirect_uri"] = form["redirect_uri"]
-        callback["state"] = form["state"]
+        callback["state"] = tx.user.session["state"]
         code = web.nbrandom(10)
         callback["code"] = code
+        print(code)
         # TODO use sql
         # XXX tx.kv["codes"][tx.user.session["client_id"]] = code
         raise web.Found(callback)
