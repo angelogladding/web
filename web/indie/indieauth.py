@@ -79,7 +79,7 @@ class AuthenticationEndpoint:
         else:
             # TODO https://indieauth.spec.indieweb.org/#profile-url-response
             web.header("Content-Type", "application/json")
-            return json.dumps({"me": tx.request.uri.host})
+            return json.dumps({"me": f"https://{tx.request.uri.host}"})
         callback = web.uri.parse(tx.user.session["redirect_uri"])
         # XXX callback["client_id"] = form["client_id"]
         # XXX callback["redirect_uri"] = form["redirect_uri"]
