@@ -68,28 +68,25 @@ class AuthenticationEndpoint:
         return self.template(name, identifier, form.scope, tx.request.uri.path)
 
     def _post(self):
+        print()
         print("  session:", tx.user.session)
         print("  form:", web.form())
+        print()
         try:
-            form = web.form("grant_type")
-            if form.grant_type == "authorization_code":
-                print(form)
-                # , "code", "client_id", "redirect_uri", "code_verifier")
-            # TODO perform checks:
-            #      https://indieauth.spec.indieweb.org/#profile-url-response
-            web.header("Content-Type", "application/json")
-            return json.dumps({"me": tx.request.uri.host})
+            web.form("code", "client_id", "redirect_uri", "code_verifier")
         except web.BadRequest:
             pass
-        # form = web.form("response_type", "redirect_uri", "client_id",
-        #                 "state", "code_challenge", "code_challenge_method")
+        else:
+            # TODO https://indieauth.spec.indieweb.org/#profile-url-response
+            web.header("Content-Type", "application/json")
+            return json.dumps({"me": tx.request.uri.host})
         callback = web.uri.parse(tx.user.session["redirect_uri"])
         # XXX callback["client_id"] = form["client_id"]
         # XXX callback["redirect_uri"] = form["redirect_uri"]
         callback["state"] = tx.user.session["state"]
         code = web.nbrandom(10)
         callback["code"] = code
-        print(code)
+        print("  code:", code)
         # TODO use sql
         # XXX tx.kv["codes"][tx.user.session["client_id"]] = code
         raise web.Found(callback)
