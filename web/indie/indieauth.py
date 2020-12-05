@@ -68,7 +68,7 @@ class AuthenticationEndpoint:
         return self.template(name, identifier, form.scope, tx.request.uri.path)
 
     def _post(self):
-        print(web.form())
+        print(tx.user.session)
         # grant_type=authorization_code
         # code - The authorization code received from the authorization endpoint in the redirect.
         # client_id - The client's URL, which MUST match the client_id used in the authentication request.
