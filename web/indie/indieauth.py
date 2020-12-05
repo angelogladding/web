@@ -70,8 +70,10 @@ class AuthenticationEndpoint:
     def _post(self):
         print(tx.user.session)
         try:
-            web.form("grant_type", "code", "client_id",
-                     "redirect_uri", "code_verifier")
+            form = web.form("grant_type")
+            if form.grant_type == "authorization_code":
+                print(form)
+                # , "code", "client_id", "redirect_uri", "code_verifier")
             # TODO perform checks:
             #      https://indieauth.spec.indieweb.org/#profile-url-response
             web.header("Content-Type", "application/json")
