@@ -26,8 +26,8 @@ def insert_references(handler, app):
         except IndexError:
             pass
         else:
-            head.append("<link rel=authorization_endpoint href=/auth>",
-                        "<link rel=token_endpoint href=/auth/token>")
+            head.append("<link rel=authorization_endpoint href=https://angelogladding.com/auth>",
+                        "<link rel=token_endpoint href=https://angelogladding.com/auth/token>")
             tx.response.body = doc.html
 
 
