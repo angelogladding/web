@@ -1190,6 +1190,10 @@ class Transaction:
         return self.request.uri.host
 
     @property
+    def is_owner(self):
+        return self.owner == self.user.session["me"]
+
+    @property
     def db(self):
         try:
             return self.host.db
