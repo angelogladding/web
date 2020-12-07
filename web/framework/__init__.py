@@ -1191,7 +1191,7 @@ class Transaction:
 
     @property
     def is_owner(self):
-        return self.owner == self.user.session["me"]
+        return self.owner == self.user.session.get("me")
 
     @property
     def db(self):
