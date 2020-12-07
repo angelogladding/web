@@ -1187,7 +1187,7 @@ class Transaction:
 
     @property
     def owner(self):
-        return self.host.owner
+        return self.request.uri.host
 
     @property
     def db(self):
