@@ -158,7 +158,7 @@ class SignOut:
     """An IndieAuth client's authorization."""
 
     def _post(self):
-        tx.user.session = None
+        tx.user.session = {}
         raise web.SeeOther("/")
 
 
