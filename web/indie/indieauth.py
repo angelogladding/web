@@ -8,7 +8,8 @@ from web.agent import unapply_dns
 
 
 server = web.application("IndieAuthServer", mount_prefix="auth")
-client = web.application("IndieAuthClient", mount_prefix="sign-in")
+client = web.application("IndieAuthClient", mount_prefix="auth")
+# TODO sign-in -> auth
 
 
 # @server.wrap  # TODO include subapp wrappers
@@ -105,7 +106,7 @@ class TokenEndpoint:
 # Client
 
 
-@client.route(r"")
+@client.route(r"sign-in")
 class SignIn:
     """An IndieAuth client's `sign-in form`."""
 
@@ -139,7 +140,7 @@ class SignIn:
         raise web.SeeOther(auth)
 
 
-@client.route(r"auth")
+@client.route(r"sign-in/auth")
 class Authorize:
     """An IndieAuth client's authorization."""
 
@@ -149,6 +150,15 @@ class Authorize:
         # request token from token_endpoint using `code`
         tx.user.session["me"] = "http://alice.example"
         # TODO return_to="/"
+        raise web.SeeOther("/")
+
+
+@client.route(r"sign-out")
+class SignOut:
+    """An IndieAuth client's authorization."""
+
+    def _post(self):
+        tx.user.session = None
         raise web.SeeOther("/")
 
 
