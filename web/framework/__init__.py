@@ -1295,6 +1295,9 @@ def resume_session(handler, app):
                                                  "HttpOnly")
         app.db.replace("sessions", identifier=identifier,
                        data=JSONEncoder().encode(tx.user.session))
+    else:
+        tx.response.headers["set-cookie"] = (("session", identifier),
+                                             ("path", "/"), ("max-age", 0))
 
 
 # TODO roles eg. owner, guest (personal context) && admin, user (service)
