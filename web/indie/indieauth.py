@@ -8,7 +8,7 @@ from web.agent import unapply_dns
 
 
 server = web.application("IndieAuthServer", mount_prefix="auth")
-client = web.application("IndieAuthClient", mount_prefix="auth")
+client = web.application("IndieAuthClient", mount_prefix="user")
 # TODO sign-in -> auth
 
 
