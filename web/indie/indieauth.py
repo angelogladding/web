@@ -159,6 +159,10 @@ class SignOut:
 
     def _post(self):
         tx.user.session = {}
+        identifier = tx.request.headers["cookie"].morsels["session"]
+        del tx.kv["sessions", identifier]
+        tx.response.headers["set-cookie"] = (("session", identifier),
+                                             ("path", "/"), ("max-age", 0))
         raise web.SeeOther("/")
 
 
