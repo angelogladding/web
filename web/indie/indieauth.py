@@ -132,7 +132,7 @@ class SignIn:
                                   f":{tx.host.port}")
         auth["me"] = user_url
         auth["client_id"] = client_id
-        auth["redirect_uri"] = client_id / "sign-in/auth"
+        auth["redirect_uri"] = client_id / "user/sign-in/auth"
         auth["response_type"] = "code"
         auth["state"] = web.nbrandom(10)
         auth["scope"] = "draft"
