@@ -1,6 +1,7 @@
 """Webmention receiver app and sending helper."""
 
 import web
+from web import tx
 
 
 receiver = web.application("Webmention", mount_prefix="mentions")
@@ -25,23 +26,22 @@ def send_mention(source, target, private=False) -> None:
     web.post(endpoint, data=payload)
 
 
-# @server.wrap  # TODO include subapp wrappers
 def insert_references(handler, app):
     """Ensure endpoint link in head of root document."""
-    # TODO only apply to routes with kwarg `mentionable=True`
-    web.tx.db.define(mentions="""received DATETIME NOT NULL DEFAULT
-                                   CURRENT_TIMESTAMP,
-                                 mention_id TEXT, data JSON,
-                                 source_url TEXT, target_url TEXT""")
+    tx.db.define(mentions="""received DATETIME NOT NULL DEFAULT
+                               CURRENT_TIMESTAMP,
+                             mention_id TEXT, data JSON,
+                             source_url TEXT, target_url TEXT""")
     yield
-    doc = web.parse(web.tx.response.body)
+    doc = web.parse(tx.response.body)
     try:
         head = doc.select("head")[0]
     except IndexError:
         pass
     else:
         head.append("<link rel=webmention href=/mentions>")
-        web.tx.response.body = doc.html
+        tx.response.body = doc.html
+    web.header("Link", f'</micropub>; rel="micropub_endpoint"', add=True)
 
 
 @receiver.route(r"")
@@ -61,15 +61,15 @@ class Mentions:
                                </ul>""")
 
     def _get(self):
-        return self.template(web.tx.db.select("mentions"))
+        return self.template(tx.db.select("mentions"))
 
     def _post(self):
         form = web.form("source", "target")
         mention_id = web.nbrandom(9)
         web.enqueue(receive, mention_id, form.source, form.target)
-        # XXX web.tx.response.naked = True
+        # XXX tx.response.naked = True
         raise web.Created("webmention received",
-                          f"{web.tx.host.name}/mentions/{mention_id}")
+                          f"{tx.host.name}/mentions/{mention_id}")
 
 
 def receive(db, mention_id, source_url, target_url) -> None:

@@ -11,7 +11,6 @@ server = web.application("IndieAuthServer", mount_prefix="auth")
 client = web.application("IndieAuthClient", mount_prefix="user")
 
 
-# @server.wrap  # TODO include subapp wrappers
 def insert_references(handler, app):
     """Ensure server links are in head of root document."""
     tx.db.define(auths="""received DATETIME NOT NULL DEFAULT
@@ -29,6 +28,8 @@ def insert_references(handler, app):
             head.append("<link rel=authorization_endpoint href=/auth>",
                         "<link rel=token_endpoint href=/auth/token>")
             tx.response.body = doc.html
+        web.header("Link", f'</auth>; rel="authorization_endpoint"', add=True)
+        web.header("Link", f'</auth/token>; rel="token_endpoint"', add=True)
 
 
 def get_client(client_id):
@@ -126,17 +127,20 @@ class SignIn:
             rels = web.get(user_url).mf2json["rels"]
         except web.ConnectionError:
             return f"can't reach https://{user_url}"
-        auth = web.uri.parse(rels["authorization_endpoint"][0])
-        tx.user.session["auth_endpoint"] = str(auth)
-        client_id = web.uri.parse(f"http://{tx.host.name}"
-                                  f":{tx.host.port}")
-        auth["me"] = user_url
-        auth["client_id"] = client_id
-        auth["redirect_uri"] = client_id / "user/sign-in/auth"
-        auth["response_type"] = "code"
-        auth["state"] = web.nbrandom(10)
-        auth["scope"] = "draft"
-        raise web.SeeOther(auth)
+        auth_endpoint = web.uri.parse(rels["authorization_endpoint"][0])
+        token_endpoint = web.uri.parse(rels["token_endpoint"][0])
+        micropub_endpoint = web.uri.parse(rels["micropub_endpoint"][0])
+        tx.user.session["auth_endpoint"] = str(auth_endpoint)
+        tx.user.session["token_endpoint"] = str(token_endpoint)
+        tx.user.session["micropub_endpoint"] = str(micropub_endpoint)
+        client_id = web.uri.parse(f"http://{tx.host.name}:{tx.host.port}")
+        auth_endpoint["me"] = user_url
+        auth_endpoint["client_id"] = client_id
+        auth_endpoint["redirect_uri"] = client_id / "user/sign-in/auth"
+        auth_endpoint["response_type"] = "code"
+        auth_endpoint["state"] = web.nbrandom(10)
+        auth_endpoint["scope"] = "draft"
+        raise web.SeeOther(auth_endpoint)
 
 
 @client.route(r"sign-in/auth")

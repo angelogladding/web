@@ -1,18 +1,26 @@
 """Microsub client and server apps."""
 
 import web
+from web import tx
 
 
-reader = web.application("MicrosubReader", mount_prefix="reader")
 server = web.application("MicrosubServer", mount_prefix="microsub")
+reader = web.application("MicrosubReader", mount_prefix="reader")
 
 
-@reader.route(r"")
-class Reader:
-    """."""
-
-    def _get(self):
-        return "reader.."
+def insert_references(handler, app):
+    """Ensure server links are in head of root document."""
+    yield
+    if tx.request.uri.path == "":
+        doc = web.parse(tx.response.body)
+        try:
+            head = doc.select("head")[0]
+        except IndexError:
+            pass
+        else:
+            head.append("<link rel=microsub href=/microsub>")
+            tx.response.body = doc.html
+        web.header("Link", f'</microsub>; rel="microsub"', add=True)
 
 
 @server.route(r"")
@@ -21,3 +29,11 @@ class MicrosubServer:
 
     def _get(self):
         return "microsub server.."
+
+
+@reader.route(r"")
+class Reader:
+    """."""
+
+    def _get(self):
+        return "reader.."
