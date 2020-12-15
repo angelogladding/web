@@ -891,6 +891,7 @@ class Application:
         tx.response._contextualize()
         path = tx.request.uri.path
 
+        print(path)
         if path.startswith("static/"):
             asset_path = path.partition("/")[2]
             if asset_path.startswith((".", "/")):
