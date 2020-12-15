@@ -891,8 +891,8 @@ class Application:
         tx.response._contextualize()
         path = tx.request.uri.path
 
-        if path.startswith("/static/"):
-            asset_path = path.partition("/static/")[2]
+        if path.startswith("static/"):
+            asset_path = path.partition("/")[2]
             if asset_path.startswith((".", "/")):
                 raise BadRequest("bad filename")
             asset = self.static_path / asset_path
