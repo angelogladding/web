@@ -911,7 +911,7 @@ class Application:
             tx.response.status = "200 OK"
             tx.response.headers.content_type = content_types[asset.suffix]
             # header("Content-Type", content_types[asset.suffix])
-            return [bytes(content, "utf-8")]
+            return content
 
         try:
             tx.host._contextualize(self, tx.request.headers.host.name,
