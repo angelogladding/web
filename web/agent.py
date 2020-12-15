@@ -188,14 +188,14 @@ class Transaction:
         self.url = str(uri.parse(str(url)))
         if fetch:
             handler = getattr(requests, method)
+            print(handler)
             self.response = handler(apply_dns(self.url), **kwargs)
             self.text = self.response.text
             self.headers = self.response.headers
 
     @property
     def location(self):
-        print("url", self.response.url)
-        print("header", self.headers["Location"])
+        print(self.headers)
         return self.response.url
 
     @property
