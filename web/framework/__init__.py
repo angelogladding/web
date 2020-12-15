@@ -707,15 +707,20 @@ class Application:
                     tx.response.body = doc.html
             self.wrap(insert_icon_rels, "post")
 
+            if str(icon).endswith("="):  # TODO better test for b64
+                payload = b64decode(icon)
+            else:
+                icon_path = pkg_resources.resource_filename(icon, "icon.png")
+                payload = pathlib.Path(icon_path)
+
             class Icon:
                 def _get(self):
                     header("Content-Type", "image/png")
-                    if str(icon).endswith("="):  # TODO better test for b64
-                        payload = b64decode(icon)
-                    else:
-                        with pathlib.Path(icon).open("rb") as fp:
-                            payload = fp.read()
-                    return payload
+                    try:
+                        with payload.open("rb") as fp:
+                            return fp.read()
+                    except AttributeError:
+                        return payload
             self.route(r"icon.png")(Icon)
             self.route(r"favicon.ico")(Icon)
         if serve:
