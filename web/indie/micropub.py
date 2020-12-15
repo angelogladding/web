@@ -12,9 +12,6 @@ def insert_references(handler, app):
     tx.db.define(syndication="""destination JSON NOT NULL""")
     yield
     if tx.request.uri.path == "":
-        print()
-        print("INSERTING!!!!!!!")
-        print()
         doc = web.parse(tx.response.body)
         try:
             head = doc.select("head")[0]
@@ -50,7 +47,6 @@ class MicropubEndpoint:
         web.header("Link", f'<https://twitter.com/angelogladding/status/'
                            f'30493490238590234>; rel="syndication"',
                    add=True)
-        print("PATHHHHHHH", tx.request.uri.path)
         raise web.Created("post created", location=permalink)
 
 
