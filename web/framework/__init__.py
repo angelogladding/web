@@ -970,6 +970,7 @@ class Application:
             tx.response.status = str(exc)  # TODO exc.status
             tx.response.body = exc.body
             if exc.code == "201":
+                print("GOT HEEEEEEEEEEEEEEEEEEEEEEEEEERE", exc.location)
                 tx.response.headers.location = exc.location
             if exc.code in ("301", "302", "303", "307", "308"):
                 redirect_uri = apply_dns(str(tx.response.body))
