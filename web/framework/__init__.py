@@ -710,7 +710,7 @@ class Application:
             class Icon:
                 def _get(self):
                     header("Content-Type", "image/png")
-                    if icon.endswith("="):
+                    if str(icon).endswith("="):  # TODO better test for b64
                         payload = b64decode(icon)
                     else:
                         with pathlib.Path(icon).open("rb") as fp:
