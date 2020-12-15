@@ -908,6 +908,7 @@ class Application:
                     raise NotFound("file not found")
             content_types = {".css": "text/css",
                              ".js": "application/javascript"}
+            tx.response.status = "200 OK"
             header("Content-Type", content_types[asset.suffix])
             return [bytes(content, "utf-8")]
 
