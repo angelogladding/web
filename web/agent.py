@@ -194,7 +194,7 @@ class Transaction:
 
     @property
     def location(self):
-        return self.response.url
+        return self.headers["location"]
 
     @property
     def links(self):
