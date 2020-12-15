@@ -48,8 +48,8 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 window.addEventListener("beforeunload", function() {
-    if (WEBACTION == false)
-        executeUnloadScripts();
+    // XXX if (WEBACTION == false)
+    // XXX     executeUnloadScripts();
 });
 
 function upgradeTimestamps() {
