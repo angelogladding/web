@@ -909,7 +909,8 @@ class Application:
             content_types = {".css": "text/css",
                              ".js": "application/javascript"}
             tx.response.status = "200 OK"
-            header("Content-Type", content_types[asset.suffix])
+            tx.response.headers.content_type = content_types[asset.suffix]
+            # header("Content-Type", content_types[asset.suffix])
             return [bytes(content, "utf-8")]
 
         try:
