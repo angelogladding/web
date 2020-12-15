@@ -59,7 +59,7 @@ class MicropubEndpoint:
         web.header("Link", f'<https://twitter.com/angelogladding/status/'
                            f'30493490238590234>; rel="syndication"',
                    add=True)
-        raise web.Created(permalink)
+        raise web.Created(location=permalink)
 
 
 @server.route(r"syndication")
