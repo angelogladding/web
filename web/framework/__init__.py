@@ -660,8 +660,8 @@ class Application:
 
     """
 
-    def __init__(self, name, *wrappers, host=None, icon=None, sessions=True,
-                 serve=False, **path_args):
+    def __init__(self, name, *wrappers, host=None, static=None, icon=None,
+                 sessions=True, serve=False, **path_args):
         self.name = name
         self.wrappers = []
         self.pre_wrappers = []
@@ -677,6 +677,9 @@ class Application:
         self.db = get_app_db(name)
         self.kv = kv.db("web", ":", {"jobqueue": "list"},
                         socket="web-redis.sock")
+        if static:
+            static_path = pkg_resources.resource_filename(static, "static")
+            self.static_path = pathlib.Path(static_path)
         if sessions:
             self.db.define(sessions="""timestamp DATETIME NOT NULL
                                            DEFAULT CURRENT_TIMESTAMP,
@@ -883,12 +886,27 @@ class Application:
         socket_handler(socket)
 
     def __call__(self, environ, start_response):
-        """
-        WSGI callable
-
-        """
+        """The WSGI callable."""
         tx.request._contextualize(environ)
         tx.response._contextualize()
+        path = tx.request.uri.path
+
+        if path.startswith("/static/"):
+            asset_path = path.partition("/static/")[2]
+            if asset_path.startswith((".", "/")):
+                raise BadRequest("bad filename")
+            asset = self.static_path / asset_path
+            print("ASSET", asset)
+            try:
+                with asset.open() as fp:
+                    content = fp.read()
+            except FileNotFoundError:
+                raise NotFound("file not found")
+            content_types = {".css": "text/css",
+                             ".js": "application/javascript"}
+            header("Content-Type", content_types[asset.suffix])
+            return [bytes(content, "utf-8")]
+
         try:
             tx.host._contextualize(self, tx.request.headers.host.name,
                                    tx.request.headers.host.port)
@@ -908,7 +926,7 @@ class Application:
                     pass
 
         try:
-            tx.request.controller = self.get_controller(tx.request.uri.path)
+            tx.request.controller = self.get_controller(path)
 
             for hook in self.pre_wrappers + self.wrappers + self.post_wrappers:
                 if not inspect.isgeneratorfunction(hook):
