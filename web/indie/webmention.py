@@ -33,15 +33,16 @@ def insert_references(handler, app):
                              mention_id TEXT, data JSON,
                              source_url TEXT, target_url TEXT""")
     yield
-    doc = web.parse(tx.response.body)
-    try:
-        head = doc.select("head")[0]
-    except IndexError:
-        pass
-    else:
-        head.append("<link rel=webmention href=/mentions>")
-        tx.response.body = doc.html
-    web.header("Link", f'</micropub>; rel="micropub_endpoint"', add=True)
+    if "mentionable" in handler:
+        doc = web.parse(tx.response.body)
+        try:
+            head = doc.select("head")[0]
+        except IndexError:
+            pass
+        else:
+            head.append("<link rel=webmention href=/mentions>")
+            tx.response.body = doc.html
+        web.header("Link", f'</mentions>; rel="webmention"', add=True)
 
 
 @receiver.route(r"")
