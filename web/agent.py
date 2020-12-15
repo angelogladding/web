@@ -190,6 +190,7 @@ class Transaction:
             handler = getattr(requests, method)
             self.response = handler(apply_dns(self.url), **kwargs)
             print()
+            print(handler)
             print(self.response)
             print(dir(self.response))
             print(self.response.headers)
