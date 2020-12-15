@@ -27,12 +27,14 @@ def insert_references(handler, app):
 
 def send_request(payload):
     """Send a Micropub request to a Micropub server."""
+    print(tx.user.session["micropub_endpoint"])
     response = requests.post(tx.user.session["micropub_endpoint"],
                              json=payload)
     print()
     print(response)
     print(dir(response))
     print(response)
+    print(response.links)
     print()
     return response.location, response.links
 
