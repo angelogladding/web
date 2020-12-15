@@ -908,9 +908,9 @@ class Application:
                     raise NotFound("file not found")
             content_types = {".css": "text/css",
                              ".js": "application/javascript"}
-            tx.response.status = "200 OK"
-            tx.response.headers.content_type = content_types[asset.suffix]
-            # header("Content-Type", content_types[asset.suffix])
+            # tx.response.headers.content_type = content_types[asset.suffix]
+            header("Content-Type", content_types[asset.suffix])
+            start_response("200 OK", tx.response.headers.wsgi)
             return [bytes(content, "utf-8")]
 
         try:
