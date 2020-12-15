@@ -123,8 +123,8 @@ class SignIn:
             user_url = web.form("me").me
         except web.BadRequest:
             return self.template(tx.host.name)
-        if not user_url.startswith("https://"):
-            user_url = "https://" + user_url
+        # if not user_url.startswith("https://"):
+        #     user_url = "https://" + user_url
         try:
             rels = web.get(user_url).mf2json["rels"]
         except web.ConnectionError:
