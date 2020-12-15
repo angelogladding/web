@@ -44,6 +44,7 @@ class MicropubEndpoint:
     """."""
 
     def _get(self):
+        print(tx.request)
         form = web.form("q")
         syndication_endpoints = []
         if form.q == "config":
