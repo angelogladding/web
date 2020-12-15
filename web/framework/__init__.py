@@ -891,18 +891,21 @@ class Application:
         tx.response._contextualize()
         path = tx.request.uri.path
 
-        print(path)
         if path.startswith("static/"):
             asset_path = path.partition("/")[2]
             if asset_path.startswith((".", "/")):
                 raise BadRequest("bad filename")
             asset = self.static_path / asset_path
-            print("ASSET", asset)
             try:
                 with asset.open() as fp:
                     content = fp.read()
             except FileNotFoundError:
-                raise NotFound("file not found")
+                asset = pathlib.Path(__file__).parent / "static" / asset_path
+                try:
+                    with asset.open() as fp:
+                        content = fp.read()
+                except FileNotFoundError:
+                    raise NotFound("file not found")
             content_types = {".css": "text/css",
                              ".js": "application/javascript"}
             header("Content-Type", content_types[asset.suffix])
