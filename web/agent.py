@@ -203,7 +203,7 @@ class Transaction:
 
     @property
     def links(self):
-        return self.headers["link"]
+        return self.response.links
 
     @property
     def dom(self):
@@ -212,10 +212,6 @@ class Transaction:
     @property
     def mf2json(self):
         return Semantics(mf.parse(self.text, self.url))
-
-    @property
-    def links(self):
-        return []
 
     @property
     def card(self):

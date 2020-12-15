@@ -12,6 +12,9 @@ def insert_references(handler, app):
     tx.db.define(syndication="""destination JSON NOT NULL""")
     yield
     if tx.request.uri.path == "":
+        print()
+        print("INSERTING!!!!!!!")
+        print()
         doc = web.parse(tx.response.body)
         try:
             head = doc.select("head")[0]
