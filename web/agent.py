@@ -203,7 +203,7 @@ class Transaction:
 
     @property
     def links(self):
-        return self.response.links
+        return self.headers["link"]
 
     @property
     def dom(self):
