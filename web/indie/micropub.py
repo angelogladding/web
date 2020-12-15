@@ -25,7 +25,7 @@ def insert_references(handler, app):
 
 def send_request(payload):
     """Send a Micropub request to a Micropub server."""
-    response = web.post(tx.user.session["micropub_endpoint"], data=payload)
+    response = web.post(tx.user.session["micropub_endpoint"], json=payload)
     return response.location, response.links
 
 
@@ -42,6 +42,7 @@ class MicropubEndpoint:
                     "syndicate-to": syndication_endpoints}
 
     def _post(self):
+        print("GOT TO THE ENDPOINT POST!")
         permalink = "/foobar"
         web.header("Link", f'</blat>; rel="shortlink"', add=True)
         web.header("Link", f'<https://twitter.com/angelogladding/status/'
