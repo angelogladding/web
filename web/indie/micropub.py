@@ -1,7 +1,5 @@
 """Micropub server app and editor helper."""
 
-import requests
-
 import web
 from web import tx
 
@@ -18,7 +16,7 @@ def insert_references(handler, app):
         try:
             head = doc.select("head")[0]
         except IndexError:
-            print("COULDN'T INSERT MICROPUB ENDPOINT")
+            pass
         else:
             head.append("<link rel=micropub_endpoint href=/micropub>")
             tx.response.body = doc.html
@@ -27,15 +25,7 @@ def insert_references(handler, app):
 
 def send_request(payload):
     """Send a Micropub request to a Micropub server."""
-    print(tx.user.session["micropub_endpoint"])
-    response = requests.post(tx.user.session["micropub_endpoint"],
-                             json=payload)
-    print()
-    print(response)
-    print(dir(response))
-    print(response)
-    print(response.links)
-    print()
+    response = web.post(tx.user.session["micropub_endpoint"], json=payload)
     return response.location, response.links
 
 
@@ -44,7 +34,6 @@ class MicropubEndpoint:
     """."""
 
     def _get(self):
-        print(tx.request)
         form = web.form("q")
         syndication_endpoints = []
         if form.q == "config":
@@ -53,7 +42,6 @@ class MicropubEndpoint:
                     "syndicate-to": syndication_endpoints}
 
     def _post(self):
-        print("GOT TO THE ENDPOINT POST!")
         permalink = "/foobar"
         web.header("Link", f'</blat>; rel="shortlink"', add=True)
         web.header("Link", f'<https://twitter.com/angelogladding/status/'

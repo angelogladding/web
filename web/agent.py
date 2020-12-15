@@ -189,23 +189,16 @@ class Transaction:
         if fetch:
             handler = getattr(requests, method)
             self.response = handler(apply_dns(self.url), **kwargs)
-            print()
-            print(handler)
-            print(self.response)
-            print(dir(self.response))
-            print(self.response.headers)
-            print()
             self.text = self.response.text
             self.headers = self.response.headers
 
     @property
     def location(self):
-        print(self.headers)
         return self.response.url
 
     @property
     def links(self):
-        return self.headers["Link"]
+        return self.response.links
 
     @property
     def dom(self):
