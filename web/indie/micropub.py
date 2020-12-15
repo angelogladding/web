@@ -1,5 +1,7 @@
 """Micropub server app and editor helper."""
 
+import requests
+
 import web
 from web import tx
 
@@ -25,7 +27,12 @@ def insert_references(handler, app):
 
 def send_request(payload):
     """Send a Micropub request to a Micropub server."""
-    response = web.post(tx.user.session["micropub_endpoint"], json=payload)
+    response = requests.post(tx.user.session["micropub_endpoint"], json=payload)
+    print()
+    print(response)
+    print(dir(response))
+    print(response)
+    print()
     return response.location, response.links
 
 
