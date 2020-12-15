@@ -16,7 +16,7 @@ def insert_references(handler, app):
         try:
             head = doc.select("head")[0]
         except IndexError:
-            pass
+            print("COULDN'T INSERT MICROPUB ENDPOINT")
         else:
             head.append("<link rel=micropub_endpoint href=/micropub>")
             tx.response.body = doc.html
