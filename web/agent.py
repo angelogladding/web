@@ -194,7 +194,12 @@ class Transaction:
 
     @property
     def location(self):
-        return self.headers["location"]
+        location = self.headers["location"]
+        if location.startswith("/"):
+            new_url = uri.parse(self.response.url)
+            new_url.path = location
+            location = str(new_url)
+        return location
 
     @property
     def links(self):
