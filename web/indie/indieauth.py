@@ -131,7 +131,6 @@ class SignIn:
             return f"can't reach https://{user_url}"
         auth_endpoint = web.uri.parse(rels["authorization_endpoint"][0])
         token_endpoint = web.uri.parse(rels["token_endpoint"][0])
-        print("FOUND ON PAGE!!!!:", rels["micropub_endpoint"][0])
         micropub_endpoint = web.uri.parse(rels["micropub_endpoint"][0])
         tx.user.session["auth_endpoint"] = str(auth_endpoint)
         tx.user.session["token_endpoint"] = str(token_endpoint)
