@@ -399,25 +399,6 @@ function previewImage(file, preview_container) {
 }
 */
 
-function previewMarkdown(content, preview_container) {
-    if (content == "") {
-        preview_container.innerHTML = "";
-        return
-    }
-
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/editor/preview/markdown");
-    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            response = JSON.parse(xhr.responseText);
-            preview_container.innerHTML = response["content"];
-        } else
-            console.log("request failed: " + xhr.status);
-    };
-    xhr.send("context=" + $$("#repost-of")[0].value + "&content=" + encodeURIComponent(content));
-}
-
 function previewResource(url, handler) {
     if (url == "") {
         // preview_container.innerHTML = "";
