@@ -120,7 +120,7 @@ def representative_hcard(parsed, source_url):
                 found.append(hcard)
                 count += 1
     if count:
-        return found[0]
+        return found[0]["properties"]
 
 
 util.representative_hcard = representative_hcard
