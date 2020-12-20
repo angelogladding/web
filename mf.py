@@ -95,7 +95,7 @@ def representative_hcard(parsed, source_url):
     for hcard in hcards:
         if (source_url in get_normal(hcard, "uid")
                 and source_url in get_normal(hcard, "url")):
-            return hcard
+            return hcard["properties"]
 
     # url that is also a rel=me
     for hcard in hcards:
@@ -108,7 +108,7 @@ def representative_hcard(parsed, source_url):
             if isinstance(rel_me, (uri.HTTPURI, uri.HTTPSURI)):
                 rel_mes.add(rel_me.minimized)
         if any(url in rel_mes for url in get_normal(hcard, "url")):
-            return hcard
+            return hcard["properties"]
 
     # single hcard with matching url
     found = []
