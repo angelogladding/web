@@ -24,6 +24,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+import hstspreload
 from . import publicsuffix
 
 __all__ = ["parse", "supported_schemes", "HTTPURI", "HTTPSURI", "WSURI",
@@ -134,6 +135,9 @@ class HTTPURI(URI):
     def __init__(self, identifier):
         super().__init__(identifier)
         self._normalize()
+
+    def is_hsts(self):
+        return hstspreload.is_hsts_preload(self.host)
 
     @classmethod
     def from_parts(cls, netloc, path="/", query=None, fragment=""):
