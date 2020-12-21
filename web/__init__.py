@@ -20,6 +20,7 @@ from mm import Template as template  # noqa
 from mm import templates  # noqa
 import pendulum  # TODO XXX
 from requests.exceptions import ConnectionError
+from uri import parse as uri
 
 from . import agent
 from .agent import *  # noqa
@@ -35,5 +36,5 @@ from .tasks import run_queue
 
 __all__ = ["in_hsts_preload", "mf", "mkdn", "mm", "template", "templates",
            "pendulum", "indieauth", "micropub", "microsub", "webmention",
-           "websub", "run_queue", "Created", "ConnectionError"]
+           "websub", "run_queue", "uri", "Created", "ConnectionError"]
 __all__ += agent.__all__ + framework.__all__

@@ -73,7 +73,7 @@ random = secrets.SystemRandom()
 
 __all__ = ["application", "serve", "anti_csrf", "form", "secure_form",
            "get_nonce", "get_token", "best_match", "sessions",
-           "require_auth", "tx", "uri", "kv", "header",
+           "require_auth", "tx", "kv", "header",
            "Application", "Resource", "nbencode", "nbdecode", "nbrandom",
            "Template", "config_templates", "generate_cert",
            "get_integrity_factory", "utcnow", "JSONEncoder",
