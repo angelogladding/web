@@ -1,6 +1,20 @@
 # web
 tools for metamodern web development
 
+    import web
+
+## A web browser
+
+    browser = web.browser()
+    browser.go("en.wikipedia.org/wiki/Pasta")
+    browser.shot("wikipedia-pasta.png")
+
+## A web cache
+
+    cache = web.cache()
+    cache["indieweb.org/note"].entry["summary"]
+    cache["indieweb.org/note"].entry["summary"]  # served from caceh
+
 ## A simple application
 
 In `hello.py`:
@@ -14,9 +28,9 @@ In `hello.py`:
         def _get(self):
             return "Hello World!"
 
-In `setup.py` (requires [`angelogladding/src`](https://github.com/angelogladding/src)):
+In `setup.py`:
 
     ...
     setup(requires=["web"],
-          provides={"web.apps": ["hello:app"]},
-          discover=__file__)
+          entry_points={"web.apps": ["hello:app"]},
+          ...)
