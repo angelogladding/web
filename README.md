@@ -39,7 +39,7 @@ In `hello.py`:
 In `setup.py`:
 
     ...
-    setup(requires=["web"],
+    setup(install_requires=["web"],
           entry_points={"web.apps": ["hello:app"]},
           ...)
 

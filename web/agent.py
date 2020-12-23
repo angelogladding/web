@@ -3,7 +3,6 @@
 import datetime
 import json
 import re
-import sh
 import time
 
 import lxml.html
@@ -440,95 +439,6 @@ class Browser:
     # XXX def shot_url(self):
     # XXX     base64 = self.browser.get_screenshot_as_base64()
     # XXX     return f"data:image/png;BASE64,{base64}"
-
-    def twitter_login(self, handle, passphrase):
-        self.go("https://twitter.com/login")
-        time.sleep(2)
-        username = self.select_first("input[type=text]")
-        username.send_keys(handle)
-        password = self.select_first("input[type=password]")
-        password.send_keys(passphrase)
-        password.submit()
-        time.sleep(3)
-
-    def twitter_syndicate_post(self, post, post_url, in_reply_to=None):
-        """syndicate a post to Twitter and return the syndication url"""
-        if in_reply_to:
-            start_url = in_reply_to
-            button = "Reply"
-            y_offset = 320
-            article_index = 1
-        else:
-            start_url = "https://twitter.com/home"
-            button = "Tweet"
-            y_offset = 220
-            article_index = 0
-        self.go(start_url)
-        time.sleep(2)
-        self.select_first(f"*[aria-label={button}]").click()
-        time.sleep(2)
-        padding = browsers.index(self) * 1024
-        sh.xdotool("mousemove", padding + 330, y_offset, "click", 1,
-                   "type", post + f" \u2014 {post_url}")
-        self.select_first("*[data-testid=tweetButton]").click()
-        time.sleep(2)
-        js = f"""return document.querySelectorAll("article")[{article_index}]
-                 .querySelectorAll("div[data-testid=tweet] a")[2].href"""
-        return self.execute_script(js)
-
-    def twitter_backfeed_post(self, syndication_url):
-        self.go(syndication_url)
-        time.sleep(2)
-        urls = []
-        for article in self.select("article"):
-            links = []
-            for a in article.find_elements_by_css_selector("a"):
-                suffixes = ("/retweets", "/retweets/with_comments", "/likes")
-                if a.get_property("target") == "_blank" or \
-                   a.text.startswith("@") or \
-                   a.get_property("href").endswith(suffixes):
-                    continue
-                links.append(a)
-            url = links[{3: 2, 4: 2, 5: 3}[len(links)]].get_property("href")
-            urls.append(url)
-        post = {"url": syndication_url}
-        if urls[0] == syndication_url:  # a note
-            article_index = 0
-            child_index = 0
-            post["comment"] = urls[1:]
-        elif urls[1] == syndication_url:  # a reply
-            post["in-reply-to"] = urls[0]
-            post["comment"] = urls[2:]
-            article_index = 1
-            child_index = 1
-        js = f"""return document.querySelectorAll("article")[{article_index}]
-                 .querySelector("div[data-testid=tweet] + div")
-                 .childNodes[{child_index}].childNodes[0].childNodes[0]
-                 .innerHTML"""
-        doc = Document(self.execute_script(js)).doc
-        children = doc.getchildren()
-        if children:
-            parts = []
-            for child in children:
-                grandchildren = child.getchildren()
-                if child.tag == "a":
-                    url = child.attrib["title"]
-                    part = f'<a href="{url}">{url}</a>'
-                elif grandchildren:
-                    grandchild_text = grandchildren[0].text_content()
-                    if grandchild_text.startswith("@"):  # @-mention
-                        part = (f'<a class=h-card href="https://twitter.com/'
-                                f'{grandchild_text}">{grandchild_text}</a>')
-                    else:  # emoji
-                        part = grandchildren[0].attrib["aria-label"]
-                else:
-                    part = child.text_content().replace("\n", "<br>")
-                parts.append(part)
-            content = "".join(parts)
-        else:
-            content = doc.text_content()
-        post["content"] = content
-        return post
 
     def shot_url(self):
         # XXX grab = pyscreenshot.grab(bbox=(0, 0, 920, 920)).tobytes()
