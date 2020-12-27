@@ -2,6 +2,8 @@
 
 """
 
+# TODO scan for gun violence, etc.
+
 # import os
 import re
 
