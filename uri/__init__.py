@@ -552,6 +552,39 @@ class WEB_ACTIONURI(URI):
         return self.query[key]
 
 
-supported_schemes = {scheme.lower()[:-3].replace("_", "+"): obj
-                     for scheme, obj in globals().items()
-                     if inspect.isclass(obj) and issubclass(obj, URI)}
+class MOZ_EXTENSIONURI(URI):
+
+    """"""
+
+    def __init__(self, identifier):
+        super().__init__(identifier)
+        self._normalize()
+
+    def _normalize(self):
+        uri = self.given
+        parts = urllib.parse.urlsplit(uri.strip())
+        self.parts = parts
+        self.extension_id = parts.netloc
+        self.query = urllib.parse.parse_qs(parts.query)
+        self._normalized = f"{parts.netloc}{parts.path}?{parts.query}"
+
+    @property
+    def normalized(self):
+        uri = f"moz-extension://{self._normalized}"
+        if self.query:
+            uri += f"?{self.parts.query}"
+        return uri
+
+    def __getitem__(self, key):
+        """get a query parameter"""
+        return self.query[key]
+
+
+supported_schemes = {}
+for scheme, obj in globals().items():
+    if inspect.isclass(obj) and issubclass(obj, URI):
+        scheme = scheme.lower()[:-3]
+        separator = "-"
+        if scheme.startswith("web"):
+            separator = "+"
+        supported_schemes[scheme.replace("_", separator)] = obj
