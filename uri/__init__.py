@@ -566,7 +566,9 @@ class MOZ_EXTENSIONURI(URI):
         self.parts = parts
         self.host = parts.netloc
         self.query = urllib.parse.parse_qs(parts.query)
-        self._normalized = f"{parts.netloc}{parts.path}?{parts.query}"
+        self._normalized = f"{parts.netloc}{parts.path}"
+        if self.query:
+            self._normalized += f"?{parts.query}"
 
     @property
     def normalized(self):
