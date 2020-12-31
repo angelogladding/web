@@ -579,6 +579,13 @@ class MOZ_EXTENSIONURI(URI):
         """get a query parameter"""
         return self.query[key]
 
+    def __setitem__(self, key, value):
+        """set a query parameter"""
+        if isinstance(value, list):
+            self.query[key] = value
+        else:
+            self.query[key] = [value]
+
 
 supported_schemes = {}
 for scheme, obj in dict(globals()).items():
