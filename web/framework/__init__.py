@@ -978,11 +978,11 @@ class Application:
                 tx.response.headers.location = exc.location
             if exc.code in ("301", "302", "303", "307", "308"):
                 redirect_uri = apply_dns(str(tx.response.body))
-                if redirect_uri.startswith(("http://", "https://")):
-                    tx.response.headers.location = redirect_uri
-                else:
+                if redirect_uri.startswith("/"):  # relative HTTP(S) URL
                     tx.response.headers.location = \
                         urllib.parse.quote(redirect_uri)
+                else:  # anything else (moz-extension, etc..)
+                    tx.response.headers.location = redirect_uri
             if exc.code == "405":
                 tx.response.headers.allow = ", ".join(dict(exc.allowed))
         except Exception as err:
