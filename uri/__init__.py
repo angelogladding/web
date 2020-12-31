@@ -564,7 +564,7 @@ class MOZ_EXTENSIONURI(URI):
         uri = self.given
         parts = urllib.parse.urlsplit(uri.strip())
         self.parts = parts
-        self.extension_id = parts.netloc
+        self.host = parts.netloc
         self.query = urllib.parse.parse_qs(parts.query)
         self._normalized = f"{parts.netloc}{parts.path}?{parts.query}"
 
