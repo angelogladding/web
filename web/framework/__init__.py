@@ -978,6 +978,7 @@ class Application:
                 tx.response.headers.location = exc.location
             if exc.code in ("301", "302", "303", "307", "308"):
                 redirect_uri = apply_dns(str(tx.response.body))
+                print(redirect_uri)
                 if redirect_uri.startswith("/"):  # relative HTTP(S) URL
                     tx.response.headers.location = \
                         urllib.parse.quote(redirect_uri)
