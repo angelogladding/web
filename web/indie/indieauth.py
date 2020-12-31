@@ -53,7 +53,7 @@ class AuthenticationEndpoint:
 
     def _get(self):
         form = web.form("me", "client_id", "redirect_uri", "state", scope=None)
-        client_url = web.uri.parse(form.client_id)
+        client_url = web.uri(form.client_id)
         # TODO use cache[url].app instead of raw mf.parse
         mfs = web.mf.parse(url=client_url)
         for item in mfs["items"]:
@@ -62,7 +62,7 @@ class AuthenticationEndpoint:
                 break
         else:
             name = "Unknown"
-        identifier = web.uri.parse(unapply_dns(client_url)).minimized
+        identifier = web.uri(unapply_dns(client_url)).minimized
         # XXX tx.user.session["client_id"] = form.client_id
         tx.user.session["redirect_uri"] = form.redirect_uri
         tx.user.session["state"] = form.state
@@ -77,7 +77,7 @@ class AuthenticationEndpoint:
             # TODO https://indieauth.spec.indieweb.org/#profile-url-response
             web.header("Content-Type", "application/json")
             return json.dumps({"me": f"https://{tx.request.uri.host}"})
-        callback = web.uri.parse(tx.user.session["redirect_uri"])
+        callback = web.uri(tx.user.session["redirect_uri"])
         # XXX callback["client_id"] = form["client_id"]
         # XXX callback["redirect_uri"] = form["redirect_uri"]
         callback["state"] = tx.user.session["state"]
@@ -129,13 +129,13 @@ class SignIn:
             rels = web.get(user_url).mf2json["rels"]
         except web.ConnectionError:
             return f"can't reach https://{user_url}"
-        auth_endpoint = web.uri.parse(rels["authorization_endpoint"][0])
-        token_endpoint = web.uri.parse(rels["token_endpoint"][0])
-        micropub_endpoint = web.uri.parse(rels["micropub_endpoint"][0])
+        auth_endpoint = web.uri(rels["authorization_endpoint"][0])
+        token_endpoint = web.uri(rels["token_endpoint"][0])
+        micropub_endpoint = web.uri(rels["micropub_endpoint"][0])
         tx.user.session["auth_endpoint"] = str(auth_endpoint)
         tx.user.session["token_endpoint"] = str(token_endpoint)
         tx.user.session["micropub_endpoint"] = str(micropub_endpoint)
-        client_id = web.uri.parse(f"http://{tx.host.name}:{tx.host.port}")
+        client_id = web.uri(f"http://{tx.host.name}:{tx.host.port}")
         auth_endpoint["me"] = user_url
         auth_endpoint["client_id"] = client_id
         # TODO don't hardcode the following
