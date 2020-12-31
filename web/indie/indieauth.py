@@ -138,6 +138,7 @@ class SignIn:
         client_id = web.uri.parse(f"http://{tx.host.name}:{tx.host.port}")
         auth_endpoint["me"] = user_url
         auth_endpoint["client_id"] = client_id
+        # TODO don't hardcode the following
         auth_endpoint["redirect_uri"] = client_id / "user/sign-in/auth"
         auth_endpoint["response_type"] = "code"
         auth_endpoint["state"] = web.nbrandom(10)
