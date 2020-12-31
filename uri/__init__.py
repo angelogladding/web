@@ -581,7 +581,7 @@ class MOZ_EXTENSIONURI(URI):
 
 
 supported_schemes = {}
-for scheme, obj in globals().items():
+for scheme, obj in dict(globals()).items():
     if inspect.isclass(obj) and issubclass(obj, URI):
         scheme = scheme.lower()[:-3]
         separator = "-"
