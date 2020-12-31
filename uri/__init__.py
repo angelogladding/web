@@ -570,10 +570,7 @@ class MOZ_EXTENSIONURI(URI):
 
     @property
     def normalized(self):
-        uri = f"moz-extension://{self._normalized}"
-        if self.query:
-            uri += f"?{self.parts.query}"
-        return uri
+        return f"moz-extension://{self._normalized}"
 
     def __getitem__(self, key):
         """get a query parameter"""
