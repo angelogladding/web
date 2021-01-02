@@ -77,6 +77,9 @@ class AuthenticationEndpoint:
             # TODO https://indieauth.spec.indieweb.org/#profile-url-response
             web.header("Content-Type", "application/json")
             return json.dumps({"me": f"https://{tx.request.uri.host}"})
+        print()
+        print(web.form)
+        print()
         callback = web.uri(tx.user.session["redirect_uri"])
         # XXX callback["client_id"] = form["client_id"]
         # XXX callback["redirect_uri"] = form["redirect_uri"]
