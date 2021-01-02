@@ -77,18 +77,17 @@ class AuthenticationEndpoint:
             # TODO https://indieauth.spec.indieweb.org/#profile-url-response
             web.header("Content-Type", "application/json")
             return json.dumps({"me": f"https://{tx.request.uri.host}"})
-        print()
-        print(web.form())
-        print()
         callback = web.uri(tx.user.session["redirect_uri"])
         # XXX callback["client_id"] = form["client_id"]
         # XXX callback["redirect_uri"] = form["redirect_uri"]
-        callback["state"] = tx.user.session["state"]
+
+        # NOTE put this back!
+        # TODO XXX callback["state"] = tx.user.session["state"]
+
         code = web.nbrandom(10)
         callback["code"] = code
         # TODO use sql
         # XXX tx.kv["codes"][tx.user.session["client_id"]] = code
-        return callback
         raise web.Found(callback)
 
 
