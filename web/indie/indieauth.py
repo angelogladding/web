@@ -85,8 +85,6 @@ class AuthenticationEndpoint:
         callback["code"] = code
         # TODO use sql
         # XXX tx.kv["codes"][tx.user.session["client_id"]] = code
-        callback = str(callback).replace("?", "/?")
-        print(callback)
         raise web.Found(callback)
 
 
