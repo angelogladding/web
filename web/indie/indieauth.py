@@ -78,7 +78,7 @@ class AuthenticationEndpoint:
             web.header("Content-Type", "application/json")
             return json.dumps({"me": f"https://{tx.request.uri.host}"})
         print()
-        print(dict(web.form))
+        print(web.form())
         print()
         callback = web.uri(tx.user.session["redirect_uri"])
         # XXX callback["client_id"] = form["client_id"]
