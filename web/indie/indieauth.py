@@ -88,6 +88,7 @@ class AuthenticationEndpoint:
         callback["code"] = code
         # TODO use sql
         # XXX tx.kv["codes"][tx.user.session["client_id"]] = code
+        return code
         raise web.Found(callback)
 
 
