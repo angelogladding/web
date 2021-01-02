@@ -87,6 +87,7 @@ class AuthenticationEndpoint:
         # XXX tx.kv["codes"][tx.user.session["client_id"]] = code
         callback = str(callback).replace("?", "/?")
         print(callback)
+        raise web.BadRequest("ASD")
         raise web.Found(callback)
 
 
