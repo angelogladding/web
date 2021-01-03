@@ -38,17 +38,22 @@ def get_client(client_id):
     name = None
     author = None
     if client_id.startswith("addons.mozilla.org"):
-        heading = web.get(client_id).dom.select("h1.AddonTitle")[0]
-        name = heading.text_content().partition(" by ")[0]
-        author_link = heading.select("a")
-        author = {"name": author_link.text_content(), "url": author_link.href}
-        return name, author
-    mfs = web.mf.parse(url=client_id)
-    for item in mfs["items"]:
-        if "h-app" in item["type"]:
-            name = item["properties"]["name"][0]
-            break
-        author = {"name": "TODO", "url": "todo.example"}
+        try:
+            heading = web.get(client_id).dom.select("h1.AddonTitle")[0]
+        except IndexError:
+            pass
+        else:
+            name = heading.text_content().partition(" by ")[0]
+            author_link = heading.select("a")
+            author = {"name": author_link.text_content(),
+                      "url": author_link.href}
+    else:
+        mfs = web.mf.parse(url=client_id)
+        for item in mfs["items"]:
+            if "h-app" in item["type"]:
+                name = item["properties"]["name"][0]
+                break
+            author = {"name": "TODO", "url": "todo.example"}
     return name, author
 
 
