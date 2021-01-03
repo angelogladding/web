@@ -6,9 +6,9 @@ $var title: Sign in to $client?
 $if client:
     $client (<small><code>$identifier</code></small>)\
 $else:
-    $identifier
+    $identifier\
 $if client_author:
-    by <a href=$client_author["url"]>$client_author["name"]</a>\
+     by <a href=$client_author["url"]>$client_author["name"]</a>\
 ?</p>
 $if scope:
     <p>Scope: $scope</p>
