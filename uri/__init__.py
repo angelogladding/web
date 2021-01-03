@@ -31,7 +31,7 @@ __all__ = ["parse", "supported_schemes", "HTTPURI", "HTTPSURI", "WSURI",
            "WSSURI", "DataURI", "JavascriptURI", "MagnetURI"]
 
 
-def parse(uri, secure=False):
+def parse(uri, secure=True):
     """Return a `URI` object for given `uri`.
 
     Various web-related protocols supported.
