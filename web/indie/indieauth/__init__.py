@@ -45,8 +45,7 @@ def get_client(client_id):
         else:
             name = heading.text_content().partition(" by ")[0]
             author_link = heading.select("a")
-            author = {"name": author_link.text_content(),
-                      "url": author_link.href}
+            author = {"name": author_link.text, "url": author_link.href}
     else:
         mfs = web.mf.parse(url=client_id)
         for item in mfs["items"]:
