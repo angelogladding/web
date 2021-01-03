@@ -3,17 +3,14 @@ $def with (client, client_author, scopes, path)
 <form method=post action=/$path>
 <fieldset>
 <legend>Client</legend>
-<p><big>
+<p><big>\
 $ title = client["url"]
 $if client["name"]:
     $if client["name"]:
         $ title = f"{client['name']} ({client['url']})"
         $client["name"]<br>
-    <a href=$client["url"]><code>$client["url"]</code></a>\
-$else:
-    $client["url"]\
 $var title = f"Sign in to {title}"
-</big></p>
+<a href=$client["url"]><code>$client["url"]</code></a></big></p>
 $if client_author:
     <p><small>$client_author["name"]<br>
     <a href=$client_author["url"]>$client_author["url"]</a></small></p>
