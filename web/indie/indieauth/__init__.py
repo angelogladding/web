@@ -37,7 +37,7 @@ def get_client(client_id):
     # FIXME unapply_dns was here..
     client = {"name": None, "url": web.uri(client_id).normalized}
     author = None
-    if client_id.startswith("https://addons.mozilla.org"):
+    if client["url"].startswith("https://addons.mozilla.org"):
         try:
             heading = web.get(client_id).dom.select("h1.AddonTitle")[0]
         except IndexError:
