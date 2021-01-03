@@ -346,6 +346,10 @@ class Element:
         self.element.getparent().replace(self.element, _make_element(html))
 
     @property
+    def href(self):
+        return self.element.href
+
+    @property
     def text(self):
         return self.element.text_content()
 
