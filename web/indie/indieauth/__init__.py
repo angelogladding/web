@@ -9,6 +9,7 @@ from web.agent import unapply_dns
 
 server = web.application("IndieAuthServer", mount_prefix="auth")
 client = web.application("IndieAuthClient", mount_prefix="user")
+templates = web.templates(__name__)
 
 
 def insert_references(handler, app):
@@ -33,40 +34,38 @@ def insert_references(handler, app):
 
 
 def get_client(client_id):
-    """."""
+    """Return the client name and author if provided."""
+    name = None
+    author = None
+    if client_id.startswith("addons.mozilla.org"):
+        heading = web.get(client_id).dom.select("h1.AddonTitle")[0]
+        name = heading.text_content().partition(" by ")[0]
+        author_link = heading.select("a")
+        author = {"name": author_link.text_content(), "url": author_link.href}
+        return name, author
+    mfs = web.mf.parse(url=client_id)
+    for item in mfs["items"]:
+        if "h-app" in item["type"]:
+            name = item["properties"]["name"][0]
+            break
+        author = {"name": "TODO", "url": "todo.example"}
+    return name, author
 
 
 @server.route(r"")
 class AuthenticationEndpoint:
     """An IndieAuth server's `authentication endpoint`."""
 
-    template = web.template("""$def with (name, identifier, scope, path)
-                               $var title: Sign in to $name?
-
-                               <form method=post action=/$path>
-                               <p>Sign in to $name at $identifier?</p>
-                               $if scope:
-                                   <p>Scope: $scope</p>
-                               <button>Sign In</button>
-                               <button>Block & Report</button>
-                               </form>""")
-
     def _get(self):
         form = web.form("me", "client_id", "redirect_uri", "state", scope=None)
-        client_url = web.uri(form.client_id)
-        # TODO use cache[url].app instead of raw mf.parse
-        mfs = web.mf.parse(url=client_url)
-        for item in mfs["items"]:
-            if "h-app" in item["type"]:
-                name = item["properties"]["name"][0]
-                break
-        else:
-            name = "Unknown"
-        identifier = web.uri(unapply_dns(client_url)).minimized
+        client_id = web.uri(form.client_id)
+        identifier = web.uri(unapply_dns(client_id)).minimized
+        client, client_author = get_client(identifier)
         # XXX tx.user.session["client_id"] = form.client_id
         tx.user.session["redirect_uri"] = form.redirect_uri
         tx.user.session["state"] = form.state
-        return self.template(name, identifier, form.scope, tx.request.uri.path)
+        return templates(client, client_author, identifier,
+                         form.scope, tx.request.uri.path)
 
     def _post(self):
         try:
@@ -110,19 +109,11 @@ class TokenEndpoint:
 class SignIn:
     """An IndieAuth client's `sign-in form`."""
 
-    template = web.template("""$def with (host)
-                               $var title: Sign in to $host
-
-                               <form>
-                               <input name=me>
-                               <button>Sign In</button>
-                               </form>""")
-
     def _get(self):
         try:
             user_url = web.form("me").me
         except web.BadRequest:
-            return self.template(tx.host.name)
+            return templates.identify(tx.host.name)
         # if not user_url.startswith("https://"):
         #     user_url = "https://" + user_url
         try:
