@@ -68,8 +68,8 @@ class AuthenticationEndpoint:
         # XXX tx.user.session["client_id"] = form.client_id
         tx.user.session["redirect_uri"] = form.redirect_uri
         tx.user.session["state"] = form.state
-        return templates(client, client_author, identifier,
-                         form.scope, tx.request.uri.path)
+        return templates.signin(client, client_author, identifier,
+                                form.scope, tx.request.uri.path)
 
     def _post(self):
         try:
