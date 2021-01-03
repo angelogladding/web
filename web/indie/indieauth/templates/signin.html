@@ -1,4 +1,4 @@
-$def with (client, client_author, identifier, scope, path)
+$def with (client, client_author, scope, path)
 
 <form method=post action=/$path>
 <p><big>
@@ -7,8 +7,8 @@ $if client:
     <a href=//$client["url"]><code>$client["url"]</code></a>\
     $var title: Sign in to $client ($client["url"])
 $else:
-    $identifier\
-    $var title: Sign in to $identifier
+    $client["url"]\
+    $var title: Sign in to $client["url"]
 </big></p>
 $if client_author:
     <p><small>$client_author["name"]<br>

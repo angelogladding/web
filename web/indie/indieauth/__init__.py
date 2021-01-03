@@ -4,7 +4,6 @@ import json
 
 import web
 from web import tx
-from web.agent import unapply_dns
 
 
 server = web.application("IndieAuthServer", mount_prefix="auth")
@@ -35,28 +34,28 @@ def insert_references(handler, app):
 
 def get_client(client_id):
     """Return the client name and author if provided."""
-    client = None
+    # FIXME unapply_dns was here..
+    client = {"name": None, "url": web.uri(client_id).normalized}
     author = None
-    if client_id.startswith("addons.mozilla.org"):
+    if client_id.startswith("https://addons.mozilla.org"):
         try:
             heading = web.get(client_id).dom.select("h1.AddonTitle")[0]
         except IndexError:
             pass
         else:
-            client = {"name": heading.text.partition(" by ")[0],
-                      "url": client_id}
+            client["name"] = heading.text.partition(" by ")[0]
             author_link = heading.select("a")[0]
             author_id = author_link.href.rstrip('/').rpartition('/')[2]
             author = {"name": author_link.text,
-                      "url": f"addons.mozilla.org/user/{author_id}"}
+                      "url": f"https://addons.mozilla.org/user/{author_id}"}
     else:
-        mfs = web.mf.parse(url=client_id)
+        mfs = web.mf.parse(url=client["url"])
         for item in mfs["items"]:
             if "h-app" in item["type"]:
                 client = {"name": item["properties"]["name"][0],
-                          "url": "todo.example"}
+                          "url": "https://todo.example"}
                 break
-            author = {"name": "TODO", "url": "todo.example"}
+            author = {"name": "TODO", "url": "https://todo.example"}
     return client, author
 
 
@@ -66,14 +65,12 @@ class AuthenticationEndpoint:
 
     def _get(self):
         form = web.form("me", "client_id", "redirect_uri", "state", scope=None)
-        client_id = web.uri(form.client_id)
-        identifier = web.uri(unapply_dns(client_id)).minimized
-        client, client_author = get_client(identifier)
-        # XXX tx.user.session["client_id"] = form.client_id
+        client, client_author = get_client(form.client_id)
+        tx.user.session["client_id"] = client["url"]
         tx.user.session["redirect_uri"] = form.redirect_uri
         tx.user.session["state"] = form.state
-        return templates.signin(client, client_author, identifier,
-                                form.scope, tx.request.uri.path)
+        return templates.signin(client, client_author, form.scope,
+                                tx.request.uri.path)
 
     def _post(self):
         try:
