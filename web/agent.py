@@ -345,9 +345,10 @@ class Element:
     def replace(self, html):
         self.element.getparent().replace(self.element, _make_element(html))
 
+    # TODO automatically add only if an: a or link
     @property
     def href(self):
-        return self.element.href
+        return self.element.attrib["href"]
 
     @property
     def text(self):
