@@ -35,7 +35,7 @@ def insert_references(handler, app):
 
 def get_client(client_id):
     """Return the client name and author if provided."""
-    name = None
+    client = None
     author = None
     if client_id.startswith("addons.mozilla.org"):
         try:
@@ -43,17 +43,21 @@ def get_client(client_id):
         except IndexError:
             pass
         else:
-            name = heading.text.partition(" by ")[0]
+            client = {"name": heading.text.partition(" by ")[0],
+                      "url": client_id}
             author_link = heading.select("a")[0]
-            author = {"name": author_link.text, "url": author_link.href}
+            author_id = author_link.href.rstrip('/').rpartition('/')[2]
+            author = {"name": author_link.text,
+                      "url": f"addons.mozilla.org/user/{author_id}"}
     else:
         mfs = web.mf.parse(url=client_id)
         for item in mfs["items"]:
             if "h-app" in item["type"]:
-                name = item["properties"]["name"][0]
+                client = {"name": item["properties"]["name"][0],
+                          "url": "todo.example"}
                 break
             author = {"name": "TODO", "url": "todo.example"}
-    return name, author
+    return client, author
 
 
 @server.route(r"")

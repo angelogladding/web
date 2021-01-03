@@ -1,5 +1,4 @@
 $def with (client, client_author, identifier, scope, path)
-$var title: Sign in to $client?
 
 <form method=post action=/$path>
 <p>
@@ -7,8 +6,10 @@ $var title: Sign in to $client?
 $if client:
     $client<br>
     <small><code>$identifier</code></small>\
+    $var title: Sign in to $client ($identifier)
 $else:
     $identifier\
+    $var title: Sign in to $identifier
 </big>
 $if client_author:
     <br><small>by
