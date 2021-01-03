@@ -336,6 +336,12 @@ class Element:
         for _html in html:
             self.element.append(_make_element(_html))
 
+    def select(self, selector):
+        els = []
+        for el in self.element.cssselect(selector):
+            els.append(Element(el))
+        return els
+
     def replace(self, html):
         self.element.getparent().replace(self.element, _make_element(html))
 
