@@ -43,8 +43,8 @@ def get_client(client_id):
         except IndexError:
             pass
         else:
-            name = heading.text_content().partition(" by ")[0]
-            author_link = heading.select("a")
+            name = heading.text.partition(" by ")[0]
+            author_link = heading.select("a")[0]
             author = {"name": author_link.text, "url": author_link.href}
     else:
         mfs = web.mf.parse(url=client_id)
