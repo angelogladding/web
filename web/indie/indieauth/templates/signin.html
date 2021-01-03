@@ -1,6 +1,8 @@
-$def with (client, client_author, scope, path)
+$def with (client, client_author, scopes, path)
 
 <form method=post action=/$path>
+<fieldset>
+<legend>Client</legend>
 <p><big>
 $if client:
     $client["name"]<br>
@@ -13,7 +15,19 @@ $else:
 $if client_author:
     <p><small>$client_author["name"]<br>
     <a href=$client_author["url"]>$client_author["url"]</a></small></p>
+</fieldset>
 $if scope:
-    <p>Scope: $scope</p>
+    <fieldset>
+    <legend>Scope</legend>
+    <ul>
+    $for scope in scopes:
+        <li><input type=checkbox name=scope value=$scope> $scope</li>
+    </ul>
+    </fieldset>
 <button>Sign In</button>
 </form>
+
+<style>
+body {
+    max-width: 40em; }
+</style>

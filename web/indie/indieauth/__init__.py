@@ -64,13 +64,14 @@ class AuthenticationEndpoint:
     """An IndieAuth server's `authentication endpoint`."""
 
     def _get(self):
-        form = web.form("me", "client_id", "redirect_uri", "state", scope=None)
+        form = web.form("me", "client_id", "redirect_uri", "state", scope="")
+        scopes = form.scope.split()
+        current_path = tx.request.uri.path
         client, client_author = get_client(form.client_id)
         tx.user.session["client_id"] = client["url"]
         tx.user.session["redirect_uri"] = form.redirect_uri
         tx.user.session["state"] = form.state
-        return templates.signin(client, client_author, form.scope,
-                                tx.request.uri.path)
+        return templates.signin(client, client_author, scopes, current_path)
 
     def _post(self):
         try:
