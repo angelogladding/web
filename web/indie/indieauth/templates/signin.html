@@ -4,7 +4,7 @@ $def with (client, client_author, scopes, path)
 <fieldset>
 <legend>Client</legend>
 <p><big>
-$ title = $client["url"]
+$ title = client["url"]
 $if client["name"]:
     $if client["name"]:
         $ title = f"{client['name']} ({client['url']})"
