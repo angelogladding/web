@@ -18,13 +18,14 @@ def insert_references(handler, app):
         except IndexError:
             pass
         else:
-            head.append("<link rel=micropub_endpoint href=/micropub>")
+            head.append("<link rel=micropub href=/micropub>")
             tx.response.body = doc.html
-        web.header("Link", f'</micropub>; rel="micropub_endpoint"', add=True)
+        web.header("Link", f'</micropub>; rel="micropub"', add=True)
 
 
 def send_request(payload):
     """Send a Micropub request to a Micropub server."""
+    # TODO FIXME what's in the session?
     response = web.post(tx.user.session["micropub_endpoint"], json=payload)
     return response.location, response.links
 
