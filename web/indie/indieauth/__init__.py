@@ -69,7 +69,7 @@ def handle_auth_response(handler=None):
     """
     form = web.form("grant_type", "code", "client_id",
                     "redirect_uri", "code_verifier")
-    if form.grant_type != "authorization_code":
+    if form["grant_type"] != "authorization_code":
         raise web.Forbidden("this endpoint only supports the "
                             "`grant_type=authorization_code`.")
     if form.code != tx.db.select("auths"):  # TODO FIXME
