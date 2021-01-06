@@ -13,10 +13,11 @@ templates = web.templates(__name__)
 
 def insert_references(handler, app):
     """Ensure server links are in head of root document."""
-    tx.db.define(auths="""received DATETIME NOT NULL DEFAULT
+    tx.db.define(auths="""initiated DATETIME NOT NULL DEFAULT
                               CURRENT_TIMESTAMP,
-                          mention_id TEXT, data JSON,
-                          source_url TEXT, target_url TEXT""")
+                          code TEXT, client_id TEXT, redirect_uri TEXT,
+                          code_challenge TEXT, code_challenge_method TEXT,
+                          scope TEXT""")
     yield
     if tx.request.uri.path == "":
         doc = web.parse(tx.response.body)
@@ -59,61 +60,87 @@ def get_client(client_id):
     return client, author
 
 
+def handle_auth_response(handler=None):
+    """
+    Handle the second leg of authorization.
+
+    This takes place before returning profile URL or access token.
+
+    """
+    form = web.form("grant_type", "code", "client_id",
+                    "redirect_uri", "code_verifier")
+    if form.grant_type != "authorization_code":
+        raise web.Forbidden("this endpoint only supports the "
+                            "`grant_type=authorization_code`.")
+    if form.code != tx.db.select("auths"):  # TODO FIXME
+        raise web.Forbidden("`code` mismatch")
+    scope = []  # TODO FIXME
+    payload = {"me": f"https://{tx.request.uri.host}"}
+    if "profile" in scope:
+        profile = {"name": "TODO NAME"}
+        if "email" in scope:
+            profile["email"] = "TODO EMAIL"
+        payload["profile"] = profile
+    if handler:
+        payload.update(**handler())
+    web.header("Content-Type", "application/json")
+    raise web.OK(json.dumps(payload))
+
+
 @server.route(r"")
-class AuthenticationEndpoint:
-    """An IndieAuth server's `authentication endpoint`."""
+class AuthorizationEndpoint:
+    """IndieAuth server `authorization endpoint`."""
 
     def _get(self):
-        form = web.form("me", "client_id", "redirect_uri", "state", scope="")
-        scopes = form.scope.split()
-        current_path = tx.request.uri.path
-        client, client_author = get_client(form.client_id)
-        tx.user.session["client_id"] = client["url"]
+        form = web.form("response_type", "client_id", "redirect_uri", "state",
+                        "code_challenge", "code_challenge_method", scope="")
+        client, developer = get_client(form.client_id)
         tx.user.session["redirect_uri"] = form.redirect_uri
         tx.user.session["state"] = form.state
-        return templates.signin(client, client_author, scopes, current_path)
+        tx.user.session["code_challenge"] = form.code_challenge
+        tx.db.insert("auths", client_id=form.client_id,
+                     redirect_uri=form.redirect_uri,
+                     code_challenge=form.code_challenge,
+                     code_challenge_method=form.code_challenge_method)
+        supported_scopes = ["create", "draft", "update", "delete",
+                            "media", "profile", "email"]
+        scopes = [s for s in form.scope.split() if s in supported_scopes]
+        return templates.signin(client, developer, scopes)
 
     def _post(self):
         try:
-            web.form("code", "client_id", "redirect_uri", "code_verifier")
+            handle_auth_response()
         except web.BadRequest:
             pass
-        else:
-            # TODO https://indieauth.spec.indieweb.org/#profile-url-response
-            web.header("Content-Type", "application/json")
-            return json.dumps({"me": f"https://{tx.request.uri.host}"})
-        callback = web.uri(tx.user.session["redirect_uri"])
-        # XXX callback["client_id"] = form["client_id"]
-        # XXX callback["redirect_uri"] = form["redirect_uri"]
-        callback["state"] = tx.user.session["state"]
-        code = web.nbrandom(10)
-        callback["code"] = code
-        # TODO use sql
-        # XXX tx.kv["codes"][tx.user.session["client_id"]] = code
-        raise web.Found(callback)
+        form = web.form("action", scopes=[])
+        redirect_uri = web.uri(tx.user.session["redirect_uri"])
+        if form.action == "cancel":
+            raise web.Found(redirect_uri)
+        code = web.nbrandom(32)
+        tx.db.update("auths", code=code, where="code_challenge = ?",
+                     vals=[tx.user.session["code_challenge"]])
+        redirect_uri["code"] = code
+        redirect_uri["state"] = tx.user.session["state"]
+        raise web.Found(redirect_uri)
 
 
 @server.route(r"token")
 class TokenEndpoint:
-    """An IndieAuth server's `token endpoint`."""
+    """IndieAuth server `token endpoint`."""
 
     def _post(self):
-        form = web.form("me", "code", "grant_type",
-                        "client_id", "redirect_uri")
-        if form.code != tx.kv["codes"][form.client_id]:
-            return "nope"
-        token = web.nbrandom(10)
-        web.header("Content-Type", "application/json")
-        return json.dumps({"access_token": token, "scope": "draft",
-                           "me": "https://{}".format(tx.host.name)})
-
-
-# Client
+        def handle_access_token_flow():
+            """Access Token response payload."""
+            token = web.nbrandom(16)
+            scopes = " ".join([])
+            return {"access_token": token, "token_type": "Bearer",
+                    "scope": scopes}
+        handle_auth_response(handle_access_token_flow)
 
 
 @client.route(r"sign-in")
 class SignIn:
-    """An IndieAuth client's `sign-in form`."""
+    """IndieAuth client sign in."""
 
     def _get(self):
         try:
@@ -145,7 +172,7 @@ class SignIn:
 
 @client.route(r"sign-in/auth")
 class Authorize:
-    """An IndieAuth client's authorization."""
+    """IndieAuth client authorization."""
 
     def _get(self):
         # form = web.form("state", "code")
@@ -158,7 +185,7 @@ class Authorize:
 
 @client.route(r"sign-out")
 class SignOut:
-    """An IndieAuth client's authorization."""
+    """IndieAuth client sign out."""
 
     def _post(self):
         tx.user.session = None
