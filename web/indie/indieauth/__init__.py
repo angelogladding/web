@@ -67,6 +67,10 @@ def handle_auth_response(handler=None):
     This takes place before returning profile URL or access token.
 
     """
+    form = web.form()
+    print()
+    print(form)
+    print()
     form = web.form("grant_type", "code", "client_id",
                     "redirect_uri", "code_verifier")
     print(form.grant_type)
