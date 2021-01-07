@@ -1,5 +1,7 @@
 """IndieAuth client and server apps and sign-in helper."""
 
+import base64
+import hashlib
 import json
 
 import web
@@ -71,7 +73,13 @@ def handle_auth_response(handler=None):
                     "redirect_uri", "code_verifier")
     if form.grant_type != "authorization_code":
         raise web.Forbidden("only grant_type=authorization_code supported")
-    if form.code != tx.db.select("auths"):  # TODO FIXME
+    computed_code_challenge = hashlib.sha256(form.code_verifier).hexdigest()
+    auth = tx.db.select("auths", where="code = ?", vals=[form.code])[0]
+    if computed_code_challenge != auth["code_challenge"]:
+        print()
+        print(computed_code_challenge)
+        print(auth["code_challenge"])
+        print()
         raise web.Forbidden("code mismatch")
     scope = []  # TODO FIXME
     payload = {"me": f"https://{tx.request.uri.host}"}
@@ -115,7 +123,8 @@ class AuthorizationEndpoint:
             raise web.Found(redirect_uri)
         code = web.nbrandom(32)
         s = tx.user.session
-        tx.db.insert("auths", code_challenge=s["code_challenge"], code=code,
+        tx.db.insert("auths", code=code,
+                     code_challenge=base64.decode(s["code_challenge"]),
                      client_id=s["client_id"], redirect_uri=s["redirect_uri"],
                      code_challenge_method=s["code_challenge_method"])
         redirect_uri["code"] = code
