@@ -124,8 +124,8 @@ class AuthorizationEndpoint:
             raise web.Found(redirect_uri)
         code = web.nbrandom(32)
         s = tx.user.session
-        tx.db.insert("auths", code=code,
-                     code_challenge=base64.b64decode(s["code_challenge"]),
+        decoded_code_challenge = base64.b64decode(s["code_challenge"]).decode()
+        tx.db.insert("auths", code=code, code_challenge=decoded_code_challenge,
                      client_id=s["client_id"], redirect_uri=s["redirect_uri"],
                      code_challenge_method=s["code_challenge_method"])
         redirect_uri["code"] = code
