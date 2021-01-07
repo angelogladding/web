@@ -67,18 +67,12 @@ def handle_auth_response(handler=None):
     This takes place before returning profile URL or access token.
 
     """
-    form = web.form()
-    print()
-    print(form)
-    print()
     form = web.form("grant_type", "code", "client_id",
                     "redirect_uri", "code_verifier")
-    print(form.grant_type)
     if form.grant_type != "authorization_code":
-        raise web.Forbidden("this endpoint only supports the "
-                            "`grant_type=authorization_code`.")
+        raise web.Forbidden("only grant_type=authorization_code supported")
     if form.code != tx.db.select("auths"):  # TODO FIXME
-        raise web.Forbidden("`code` mismatch")
+        raise web.Forbidden("code mismatch")
     scope = []  # TODO FIXME
     payload = {"me": f"https://{tx.request.uri.host}"}
     if "profile" in scope:
@@ -100,13 +94,11 @@ class AuthorizationEndpoint:
         form = web.form("response_type", "client_id", "redirect_uri", "state",
                         "code_challenge", "code_challenge_method", scope="")
         client, developer = get_client(form.client_id)
+        tx.user.session["client_id"] = form.client_id
         tx.user.session["redirect_uri"] = form.redirect_uri
         tx.user.session["state"] = form.state
         tx.user.session["code_challenge"] = form.code_challenge
-        tx.db.insert("auths", client_id=form.client_id,
-                     redirect_uri=form.redirect_uri,
-                     code_challenge=form.code_challenge,
-                     code_challenge_method=form.code_challenge_method)
+        tx.user.session["code_challenge_method"] = form.code_challenge_method
         supported_scopes = ["create", "draft", "update", "delete",
                             "media", "profile", "email"]
         scopes = [s for s in form.scope.split() if s in supported_scopes]
@@ -122,8 +114,10 @@ class AuthorizationEndpoint:
         if form.action == "cancel":
             raise web.Found(redirect_uri)
         code = web.nbrandom(32)
-        tx.db.update("auths", code=code, where="code_challenge = ?",
-                     vals=[tx.user.session["code_challenge"]])
+        s = tx.user.session
+        tx.db.insert("auths", code_challenge=s["code_challenge"], code=code,
+                     client_id=s["client_id"], redirect_uri=s["redirect_uri"],
+                     code_challenge_method=s["code_challenge_method"])
         redirect_uri["code"] = code
         redirect_uri["state"] = tx.user.session["state"]
         raise web.Found(redirect_uri)
