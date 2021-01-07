@@ -138,9 +138,18 @@ class TokenEndpoint:
     """IndieAuth server `token endpoint`."""
 
     def _post(self):
+        try:
+            form = web.form("action", "token")
+            if form.action == "revoke":
+                # TODO revoke token
+                raise web.OK("")
+        except web.BadRequest:
+            pass
+
         def handle_access_token_flow():
             """Access Token response payload."""
             token = web.nbrandom(16)
+            # TODO add token to db (for validation, renewal and revocation)
             scopes = " ".join([])
             return {"access_token": token, "token_type": "Bearer",
                     "scope": scopes}
