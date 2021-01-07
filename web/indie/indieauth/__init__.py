@@ -73,7 +73,8 @@ def handle_auth_response(handler=None):
                     "redirect_uri", "code_verifier")
     if form.grant_type != "authorization_code":
         raise web.Forbidden("only grant_type=authorization_code supported")
-    computed_code_challenge = hashlib.sha256(form.code_verifier).hexdigest()
+    computed_code_challenge = \
+        hashlib.sha256(form.code_verifier.encode("ascii")).hexdigest()
     auth = tx.db.select("auths", where="code = ?", vals=[form.code])[0]
     if computed_code_challenge != auth["code_challenge"]:
         print()
