@@ -126,13 +126,17 @@ class TokenEndpoint:
             if "email" in scope:
                 profile["email"] = "TODO EMAIL"
             response["profile"] = profile
-        if scope and len([s for s in scope if s not in ("profile", "email")]):
+        if scope and self.is_token_request(scope):
             response.update(access_token=web.nbrandom(16),
                             token_type="Bearer", scope=" ".join(scope))
         tx.db.update("auths", response=response,
                      where="code = ?", vals=[auth["code"]])
         web.header("Content-Type", "application/json")
         return json.dumps(response)
+
+    def is_token_request(self, scope):
+        """Determine whether the list of scopes dictates a token reuqest."""
+        return bool(len([s for s in scope if s not in ("profile", "email")]))
 
 
 @server.route(r"history")
