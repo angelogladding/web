@@ -3,7 +3,6 @@ $var title: Authorizations
 
 <ul>
 $for auth in authorizations:
-    <li>$auth.client_id <small>($auth.scope)<br>
-    $auth.redirect_uri<br>
-    $auth.initiated</small></li>
+    <li>$auth["client_id"] <small>($auth["scope"])<br>
+    $auth["redirect_uri"]<br>$auth["initiated"]</small></li>
 </ul>
