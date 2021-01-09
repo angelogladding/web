@@ -2,6 +2,8 @@ $def with (authorizations)
 $var title: Authorizations
 
 <ul>
-$for authorization in authorizations:
-    <li>$dict(authorization)</li>
+$for auth in authorizations:
+    <li>$auth.client_id <small>($auth.scope)<br>
+    $auth.redirect_uri<br>
+    $auth.initiated</small></li>
 </ul>
