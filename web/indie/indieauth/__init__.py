@@ -16,10 +16,10 @@ templates = web.templates(__name__)
 def insert_references(handler, app):
     """Ensure server links are in head of root document."""
     tx.db.define(auths="""initiated DATETIME NOT NULL DEFAULT
-                              CURRENT_TIMESTAMP,
+                              CURRENT_TIMESTAMP, revoked DATETIME,
                           code TEXT, client_id TEXT, redirect_uri TEXT,
                           code_challenge TEXT, code_challenge_method TEXT,
-                          scope TEXT""")
+                          response JSON""")
     yield
     if tx.request.uri.path == "":
         doc = web.parse(tx.response.body)
@@ -62,35 +62,6 @@ def get_client(client_id):
     return client, author
 
 
-def handle_auth_response(handler=None):
-    """
-    Handle the second leg of authorization.
-
-    This takes place before returning profile URL or access token.
-
-    """
-    form = web.form("grant_type", "code", "client_id",
-                    "redirect_uri", "code_verifier")
-    if form.grant_type != "authorization_code":
-        raise web.Forbidden("only grant_type=authorization_code supported")
-    auth = tx.db.select("auths", where="code = ?", vals=[form.code])[0]
-    computed_code_challenge = \
-        hashlib.sha256(form.code_verifier.encode("ascii")).hexdigest()
-    if auth["code_challenge"] != computed_code_challenge:
-        raise web.Forbidden("code mismatch")
-    scope = []  # TODO FIXME
-    payload = {"me": f"https://{tx.request.uri.host}"}
-    if "profile" in scope:
-        profile = {"name": "TODO NAME"}
-        if "email" in scope:
-            profile["email"] = "TODO EMAIL"
-        payload["profile"] = profile
-    if handler:
-        payload.update(**handler())
-    web.header("Content-Type", "application/json")
-    raise web.OK(json.dumps(payload))
-
-
 @server.route(r"")
 class AuthorizationEndpoint:
     """IndieAuth server `authorization endpoint`."""
@@ -110,10 +81,6 @@ class AuthorizationEndpoint:
         return templates.signin(client, developer, scopes)
 
     def _post(self):
-        try:
-            handle_auth_response()
-        except web.BadRequest:
-            pass
         form = web.form("action", scopes=[])
         redirect_uri = web.uri(tx.user.session["redirect_uri"])
         if form.action == "cancel":
@@ -138,19 +105,34 @@ class TokenEndpoint:
         try:
             form = web.form("action", "token")
             if form.action == "revoke":
-                # TODO revoke token
+                tx.db.update("auths", revoked=web.utcnow(),
+                             where="token = ?", vals=[form.token])
                 raise web.OK("")
         except web.BadRequest:
             pass
-
-        def handle_access_token_flow():
-            """Access Token response payload."""
-            token = web.nbrandom(16)
-            # TODO add token to db (for validation, renewal and revocation)
-            scopes = " ".join([])
-            return {"access_token": token, "token_type": "Bearer",
-                    "scope": scopes}
-        handle_auth_response(handle_access_token_flow)
+        form = web.form("grant_type", "code", "client_id",
+                        "redirect_uri", "code_verifier")
+        if form.grant_type != "authorization_code":
+            raise web.Forbidden("only grant_type=authorization_code supported")
+        auth = tx.db.select("auths", where="code = ?", vals=[form.code])[0]
+        computed_code_challenge = \
+            hashlib.sha256(form.code_verifier.encode("ascii")).hexdigest()
+        if auth["code_challenge"] != computed_code_challenge:
+            raise web.Forbidden("code mismatch")
+        scope = auth["scope"].split()
+        response = {"me": f"https://{tx.request.uri.host}"}
+        if "profile" in scope:
+            profile = {"name": "TODO NAME"}
+            if "email" in scope:
+                profile["email"] = "TODO EMAIL"
+            response["profile"] = profile
+        if scope and len([s for s in scope if s not in ("profile", "email")]):
+            response.update(access_token=web.nbrandom(16),
+                            token_type="Bearer", scope=" ".join(scope))
+        tx.db.update("auths", response=response,
+                     where="code = ?", vals=[auth["code"]])
+        web.header("Content-Type", "application/json")
+        return json.dumps(response)
 
 
 @server.route(r"history")
