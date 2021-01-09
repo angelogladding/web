@@ -1,8 +1,6 @@
 $def with (authorizations)
 $var title: Authorizations
 
-<ul>
 $for auth in authorizations:
-    <li>$auth["client_id"] <small>($auth["scope"])<br>
-    $auth["redirect_uri"]<br>$auth["initiated"]</small></li>
-</ul>
+    <p>$auth["client_id"] <small>($", ".join(auth["scope"].split()))<br>
+    $auth["redirect_uri"]<br>$auth["initiated"]</small></p>

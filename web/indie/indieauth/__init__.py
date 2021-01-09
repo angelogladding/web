@@ -123,7 +123,8 @@ class AuthorizationEndpoint:
         decoded_code_challenge = base64.b64decode(s["code_challenge"]).decode()
         tx.db.insert("auths", code=code, code_challenge=decoded_code_challenge,
                      client_id=s["client_id"], redirect_uri=s["redirect_uri"],
-                     code_challenge_method=s["code_challenge_method"])
+                     code_challenge_method=s["code_challenge_method"],
+                     scope=" ".join(form.scopes))
         redirect_uri["code"] = code
         redirect_uri["state"] = tx.user.session["state"]
         raise web.Found(redirect_uri)
