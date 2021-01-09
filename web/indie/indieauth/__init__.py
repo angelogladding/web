@@ -73,14 +73,10 @@ def handle_auth_response(handler=None):
                     "redirect_uri", "code_verifier")
     if form.grant_type != "authorization_code":
         raise web.Forbidden("only grant_type=authorization_code supported")
+    auth = tx.db.select("auths", where="code = ?", vals=[form.code])[0]
     computed_code_challenge = \
         hashlib.sha256(form.code_verifier.encode("ascii")).hexdigest()
-    auth = tx.db.select("auths", where="code = ?", vals=[form.code])[0]
-    if computed_code_challenge != auth["code_challenge"]:
-        print()
-        print(computed_code_challenge)
-        print(auth["code_challenge"])
-        print()
+    if auth["code_challenge"] != computed_code_challenge:
         raise web.Forbidden("code mismatch")
     scope = []  # TODO FIXME
     payload = {"me": f"https://{tx.request.uri.host}"}
@@ -154,6 +150,15 @@ class TokenEndpoint:
             return {"access_token": token, "token_type": "Bearer",
                     "scope": scopes}
         handle_auth_response(handle_access_token_flow)
+
+
+@server.route(r"history")
+class AuthorizationHistory:
+    """IndieAuth server authorizations."""
+
+    def _get(self):
+        auths = tx.db.select("auths")
+        return templates.authorizations(auths)
 
 
 @client.route(r"sign-in")
