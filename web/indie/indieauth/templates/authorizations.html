@@ -3,4 +3,4 @@ $var title: Authorizations
 
 $for auth in authorizations:
     <p>$auth["client_id"]<br><small>$auth["redirect_uri"]<br>
-    $auth["initiated"] ($", ".join([f"<b>{s}</b>" for s in auth["scope"].split()]))</small></p>
+    $auth["initiated"] ($", ".join(auth["scope"].split()))</small></p>
