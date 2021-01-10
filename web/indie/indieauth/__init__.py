@@ -91,7 +91,7 @@ class AuthorizationEndpoint:
         tx.db.insert("auths", code=code, code_challenge=decoded_code_challenge,
                      client_id=s["client_id"], redirect_uri=s["redirect_uri"],
                      code_challenge_method=s["code_challenge_method"],
-                     scope=" ".join(form.scopes))
+                     response={"scope": " ".join(form.scopes)})
         redirect_uri["code"] = code
         redirect_uri["state"] = tx.user.session["state"]
         raise web.Found(redirect_uri)
@@ -119,8 +119,8 @@ class TokenEndpoint:
             hashlib.sha256(form.code_verifier.encode("ascii")).hexdigest()
         if auth["code_challenge"] != computed_code_challenge:
             raise web.Forbidden("code mismatch")
-        scope = auth["scope"].split()
-        response = {"me": f"https://{tx.request.uri.host}"}
+        response = auth["response"]
+        scope = response["scope"].split()
         if "profile" in scope:
             profile = {"name": "TODO NAME"}
             if "email" in scope:
@@ -128,7 +128,8 @@ class TokenEndpoint:
             response["profile"] = profile
         if scope and self.is_token_request(scope):
             response.update(access_token=web.nbrandom(16),
-                            token_type="Bearer", scope=" ".join(scope))
+                            token_type="Bearer")
+        response["me"] = f"https://{tx.request.uri.host}"
         tx.db.update("auths", response=response,
                      where="code = ?", vals=[auth["code"]])
         web.header("Content-Type", "application/json")
