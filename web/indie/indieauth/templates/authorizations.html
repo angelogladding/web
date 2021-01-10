@@ -4,5 +4,7 @@ $var title: Authorizations
 $for auth in authorizations:
     <p>$auth["client_id"]<br><small>$auth["redirect_uri"]<br>
     $auth["initiated"]</small></p>
-    <pre>$auth["response"]</pre>
-    $# ($", ".join(auth["scope"].split()))
+    $ r = auth["response"]
+    <p>$", ".join(r["scope"].split())</p>
+    <p>$r["profile"]</p>
+    <p>$r["access_token"]</p>
