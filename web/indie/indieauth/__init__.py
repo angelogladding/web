@@ -105,8 +105,9 @@ class TokenEndpoint:
         try:
             form = web.form("action", "token")
             if form.action == "revoke":
-                tx.db.update("auths", revoked=web.utcnow(),
-                             where="token = ?", vals=[form.token])
+                tx.db.update("auths", revoked=web.utcnow(), vals=[form.token],
+                             where="""json_extract(response,
+                                                   '$.access_token') = ?""")
                 raise web.OK("")
         except web.BadRequest:
             pass
