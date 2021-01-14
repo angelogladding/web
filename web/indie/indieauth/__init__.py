@@ -102,13 +102,8 @@ class TokenEndpoint:
     """IndieAuth server `token endpoint`."""
 
     def _post(self):
-        print()
-        print(web.form())
-        print()
         try:
             form = web.form("action", "token")
-            print(form.action)
-            print(form.token)
             if form.action == "revoke":
                 tx.db.update("auths", revoked=web.utcnow(), vals=[form.token],
                              where="""json_extract(response,
