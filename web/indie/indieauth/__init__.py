@@ -67,8 +67,13 @@ class AuthorizationEndpoint:
     """IndieAuth server `authorization endpoint`."""
 
     def _get(self):
-        form = web.form("response_type", "client_id", "redirect_uri", "state",
-                        "code_challenge", "code_challenge_method", scope="")
+        try:
+            form = web.form("response_type", "client_id", "redirect_uri",
+                            "state", "code_challenge", "code_challenge_method",
+                            scope="")
+        except web.BadRequest:
+            auths = tx.db.select("auths")
+            return templates.authorizations(auths)
         client, developer = get_client(form.client_id)
         tx.user.session["client_id"] = form.client_id
         tx.user.session["redirect_uri"] = form.redirect_uri
@@ -139,15 +144,6 @@ class TokenEndpoint:
     def is_token_request(self, scope):
         """Determine whether the list of scopes dictates a token reuqest."""
         return bool(len([s for s in scope if s not in ("profile", "email")]))
-
-
-@server.route(r"history")
-class AuthorizationHistory:
-    """IndieAuth server authorizations."""
-
-    def _get(self):
-        auths = tx.db.select("auths")
-        return templates.authorizations(auths)
 
 
 @client.route(r"sign-in")
