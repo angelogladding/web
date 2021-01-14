@@ -5,6 +5,7 @@ from web import tx
 
 
 server = web.application("Micropub", mount_prefix="micropub")
+templates = web.templates(__name__)
 
 
 def insert_references(handler, app):
@@ -35,12 +36,16 @@ class MicropubEndpoint:
     """."""
 
     def _get(self):
-        form = web.form("q")
+        try:
+            form = web.form("q")
+        except web.BadRequest:
+            return templates.activity()
         syndication_endpoints = []
         if form.q == "config":
             return {"q": ["category", "contact", "source", "syndicate-to"],
                     "media-endpoint": "/micropub/media",
                     "syndicate-to": syndication_endpoints}
+        return "unsupported `q` command"
 
     def _post(self):
         permalink = "/foobar"
@@ -56,15 +61,7 @@ class Syndication:
     """."""
 
     def _get(self):
-        return """<form method=post>
-                  Twitter<br>
-                  <input name=twitter_username placeholder=username><br>
-                  <input name=twitter_password placeholder=password><br>
-                  GitHub<br>
-                  <input name=github_username placeholder=username><br>
-                  <input name=github_token placeholder=token><br>
-                  <button>Save</button>
-                  </form>"""
+        return templates.syndication()
 
     def _post(self):
         destinations = web.form()
