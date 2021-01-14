@@ -103,10 +103,10 @@ class TokenEndpoint:
 
     def _post(self):
         print()
+        print(web.form())
         print()
         try:
             form = web.form("action", "token")
-            print(form)
             print(form.action)
             print(form.token)
             if form.action == "revoke":
