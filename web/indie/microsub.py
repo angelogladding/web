@@ -4,7 +4,7 @@ import web
 from web import tx
 
 
-server = web.application("MicrosubServer", mount_prefix="microsub")
+server = web.application("MicrosubServer", mount_prefix="sub")
 reader = web.application("MicrosubReader", mount_prefix="reader")
 
 
@@ -18,9 +18,9 @@ def insert_references(handler, app):
         except IndexError:
             pass
         else:
-            head.append("<link rel=microsub href=/microsub>")
+            head.append("<link rel=microsub href=/sub>")
             tx.response.body = doc.html
-        web.header("Link", f'</microsub>; rel="microsub"', add=True)
+        web.header("Link", f'</sub>; rel="microsub"', add=True)
 
 
 @server.route(r"")

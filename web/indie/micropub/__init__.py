@@ -4,7 +4,7 @@ import web
 from web import tx
 
 
-server = web.application("Micropub", mount_prefix="micropub")
+server = web.application("MicropubServer", mount_prefix="pub")
 templates = web.templates(__name__)
 
 
@@ -19,9 +19,9 @@ def insert_references(handler, app):
         except IndexError:
             pass
         else:
-            head.append("<link rel=micropub href=/micropub>")
+            head.append("<link rel=micropub href=/pub>")
             tx.response.body = doc.html
-        web.header("Link", f'</micropub>; rel="micropub"', add=True)
+        web.header("Link", f'</pub>; rel="micropub"', add=True)
 
 
 def send_request(payload):
@@ -39,11 +39,12 @@ class MicropubEndpoint:
         try:
             form = web.form("q")
         except web.BadRequest:
+            print(tx.db.select("auths"))
             return templates.activity()
         syndication_endpoints = []
         if form.q == "config":
             return {"q": ["category", "contact", "source", "syndicate-to"],
-                    "media-endpoint": "/micropub/media",
+                    "media-endpoint": "/pub/media",
                     "syndicate-to": syndication_endpoints}
         return "unsupported `q` command"
 
