@@ -6,7 +6,8 @@ $for auth in authorizations:
     $auth["initiated"]</small></p>
     $ r = auth["response"]
     <p>$", ".join(r["scope"].split())</p>
-    <p>$r["profile"]</p>
+    $if "profile" in r:
+        <p>$r["profile"]</p>
     <p>$r["access_token"]</p>
     $ revoked = auth["revoked"]
     $if revoked:
