@@ -39,7 +39,7 @@ class MicropubEndpoint:
         try:
             form = web.form("q")
         except web.BadRequest:
-            print(tx.db.select("auths"))
+            print(len(list(tx.db.select("auths"))))
             return templates.activity()
         syndication_endpoints = []
         if form.q == "config":
