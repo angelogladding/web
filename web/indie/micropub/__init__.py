@@ -10,12 +10,13 @@ templates = web.templates(__name__)
 
 def insert_references(handler, app):
     """Ensure server links are in head of root document."""
-    # tx.db.define(resources="""initiated DATETIME NOT NULL DEFAULT
-    #                               CURRENT_TIMESTAMP, revoked DATETIME,
-    #                           code TEXT, client_id TEXT, redirect_uri TEXT,
-    #                           code_challenge TEXT, code_challenge_method TEXT,
-    #                           response JSON""",
-    #              syndication="""destination JSON NOT NULL""")
+    tx.db.define(resources="""resource JSON,
+                              published TEXT AS (json_extract(resource,
+                                  '$.published')) STORED,
+                              url TEXT AS (json_extract(resource,
+                                  '$.url')) STORED""",
+                 syndication="""destination JSON NOT NULL""")
+    tx.pub = LocalClient()
     yield
     if tx.request.uri.path == "":
         doc = web.parse(tx.response.body)
@@ -34,6 +35,36 @@ def send_request(payload):
     # TODO FIXME what's in the session?
     response = web.post(tx.user.session["micropub_endpoint"], json=payload)
     return response.location, response.links
+
+
+class LocalClient:
+    """A localized interface to the endpoint's backend."""
+
+    def read(self, url):
+        """Return a resource with its metadata."""
+        return tx.db.select("resources", where="url = ?", vals=[url],
+                            order="published DESC", limit=1)[0]["resource"]
+
+    def read_all(self, limit=20):
+        """Return a list of all resources."""
+        tx.db.select("resources, json_tree(resources.resource, '$.name')",
+                     where="json_tree.type == 'text'",
+                     order="published desc")
+
+    def create(self, url, resource):
+        """Write a resource and return its permalink."""
+        now = web.utcnow()
+        url = url.format(dtslug=web.timeslug(now),
+                         nameslug=web.textslug(resource.get("name", "")))
+        try:
+            author = self.read("about")
+        except IndexError:  # TODO bootstrap first post with first post
+            author = dict(resource)
+        author.pop("type")
+        tx.db.insert("resources", resource=dict(**resource, published=now,
+                                                url=url, author=author))
+        # TODO tx.db.snapshot()
+        return url
 
 
 @server.route(r"")
