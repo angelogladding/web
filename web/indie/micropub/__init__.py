@@ -45,7 +45,7 @@ class MicropubEndpoint:
             form = web.form("q")
         except web.BadRequest:
             clients = tx.db.select("auths", what="DISTINCT client_id")
-            posts = tx.db
+            posts = []  # tx.db.select("")
             return templates.activity(clients, posts)
         syndication_endpoints = []
         if form.q == "config":
