@@ -1,4 +1,14 @@
-$def with ()
+$def with (clients, posts)
 $var title: Micropub Activity
 
-<p>clients &amp; posts...</p>
+<h2>Clients</h2>
+<ul>
+$for client in clients:
+    <li>$client["client_id"]</li>
+</ul>
+
+<h2>Posts</h2>
+<ul>
+$for post in posts:
+    <li>$post</li>
+</ul>

@@ -10,7 +10,12 @@ templates = web.templates(__name__)
 
 def insert_references(handler, app):
     """Ensure server links are in head of root document."""
-    tx.db.define(syndication="""destination JSON NOT NULL""")
+    # tx.db.define(resources="""initiated DATETIME NOT NULL DEFAULT
+    #                               CURRENT_TIMESTAMP, revoked DATETIME,
+    #                           code TEXT, client_id TEXT, redirect_uri TEXT,
+    #                           code_challenge TEXT, code_challenge_method TEXT,
+    #                           response JSON""",
+    #              syndication="""destination JSON NOT NULL""")
     yield
     if tx.request.uri.path == "":
         doc = web.parse(tx.response.body)
@@ -39,8 +44,9 @@ class MicropubEndpoint:
         try:
             form = web.form("q")
         except web.BadRequest:
-            print(len(list(tx.db.select("auths"))))
-            return templates.activity()
+            clients = tx.db.select("auths", what="DISTINCT client_id")
+            posts = tx.db
+            return templates.activity(clients, posts)
         syndication_endpoints = []
         if form.q == "config":
             return {"q": ["category", "contact", "source", "syndicate-to"],
