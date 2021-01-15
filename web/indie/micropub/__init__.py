@@ -42,21 +42,21 @@ class LocalClient:
 
     def read(self, url):
         """Return a resource with its metadata."""
-        return tx.db.select("resources", where="url = ?", vals=[url],
+        return tx.db.select("resources", where="url = ?", vals=["/" + url],
                             order="published DESC", limit=1)[0]["resource"]
 
     def read_all(self, limit=20):
         """Return a list of all resources."""
-        return tx.db.select("resources, "
-                            "json_tree(resources.resource, '$.name')",
+        return tx.db.select("""resources, json_tree(resources.resource,
+                                                    '$.name')""",
                             where="json_tree.type == 'text'",
                             order="published desc")
 
     def create(self, url, resource):
         """Write a resource and return its permalink."""
         now = web.utcnow()
-        url = url.format(dtslug=web.timeslug(now),
-                         nameslug=web.textslug(resource.get("name", "")))
+        url = "/" + url.format(dtslug=web.timeslug(now),
+                               nameslug=web.textslug(resource.get("name", "")))
         try:
             author = self.read("about")
         except IndexError:  # TODO bootstrap first post with first post
@@ -77,7 +77,7 @@ class MicropubEndpoint:
             form = web.form("q")
         except web.BadRequest:
             clients = tx.db.select("auths", what="DISTINCT client_id")
-            posts = []  # tx.db.select("")
+            posts = LocalClient().read_all()
             return templates.activity(clients, posts)
         syndication_endpoints = []
         if form.q == "config":
@@ -87,6 +87,14 @@ class MicropubEndpoint:
         return "unsupported `q` command"
 
     def _post(self):
+        form = web.form()
+        print()
+        print(form)
+        print()
+        print(tx.request.body)
+        print()
+        print(tx.request.body._data)
+        print()
         permalink = "/foobar"
         web.header("Link", f'</blat>; rel="shortlink"', add=True)
         web.header("Link", f'<https://twitter.com/angelogladding/status/'
