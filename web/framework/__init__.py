@@ -428,6 +428,10 @@ class Form(dict):
 
     def __init__(self, *requireds, **defaults):
         _data = tx.request.body._data
+        print()
+        print(tx.request.headers)
+        print(_data)
+        print()
         for required in requireds:
             if required not in _data:
                 err_msg = "required `{}` not present in request"
