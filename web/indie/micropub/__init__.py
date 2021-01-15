@@ -47,9 +47,10 @@ class LocalClient:
 
     def read_all(self, limit=20):
         """Return a list of all resources."""
-        tx.db.select("resources, json_tree(resources.resource, '$.name')",
-                     where="json_tree.type == 'text'",
-                     order="published desc")
+        return tx.db.select("resources, "
+                            "json_tree(resources.resource, '$.name')",
+                            where="json_tree.type == 'text'",
+                            order="published desc")
 
     def create(self, url, resource):
         """Write a resource and return its permalink."""
