@@ -87,14 +87,7 @@ class MicropubEndpoint:
         return "unsupported `q` command"
 
     def _post(self):
-        form = web.form()
-        print()
-        print(form)
-        print()
         print(tx.request.body)
-        print()
-        print(tx.request.body._data)
-        print()
         permalink = "/foobar"
         web.header("Link", f'</blat>; rel="shortlink"', add=True)
         web.header("Link", f'<https://twitter.com/angelogladding/status/'
