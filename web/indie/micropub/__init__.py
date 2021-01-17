@@ -12,9 +12,9 @@ def insert_references(handler, app):
     """Ensure server links are in head of root document."""
     tx.db.define(resources="""resource JSON,
                               published TEXT AS (json_extract(resource,
-                                  '$.published')) STORED,
+                                  '$.properties.published')) STORED,
                               url TEXT AS (json_extract(resource,
-                                  '$.url')) STORED""",
+                                  '$.properties.url')) STORED""",
                  syndication="""destination JSON NOT NULL""")
     tx.pub = LocalClient()
     yield
@@ -48,24 +48,26 @@ class LocalClient:
     def read_all(self, limit=20):
         """Return a list of all resources."""
         return tx.db.select("""resources, json_tree(resources.resource,
-                                                    '$.name')""",
-                            where="json_tree.type == 'text'",
+                                                    '$.properties.name')""",
+                            where="json_tree.type == 'array'",  # TODO er?
                             order="published desc")
 
     def create(self, url, resource):
         """Write a resource and return its permalink."""
         now = web.utcnow()
-        url = "/" + url.format(dtslug=web.timeslug(now),
-                               nameslug=web.textslug(resource.get("name", "")))
+        nameslug = web.textslug(resource["properties"].get("name", "unknown"))
+        permalink = "/" + url.format(dtslug=web.timeslug(now),
+                                     nameslug=nameslug)
         try:
             author = self.read("about")
         except IndexError:  # TODO bootstrap first post with first post
             author = dict(resource)
         author.pop("type")
-        tx.db.insert("resources", resource=dict(**resource, published=now,
-                                                url=url, author=author))
-        # TODO tx.db.snapshot()
-        return url
+        resource["properties"].update(published=now, url=permalink,
+                                      author=author)
+        tx.db.insert("resources", resource=resource)
+        # TODO snapshot database
+        return permalink
 
 
 @server.route(r"")
@@ -87,12 +89,13 @@ class MicropubEndpoint:
         return "unsupported `q` command"
 
     def _post(self):
-        print(tx.request.body)
-        permalink = "/foobar"
+        resource = tx.request.body._data
+        if "bookmark-of" in resource["properties"]:
+            slug = "{dtslug}/grab-nameslug-from-cite"
+        permalink = LocalClient().create(slug, resource)
         web.header("Link", f'</blat>; rel="shortlink"', add=True)
         web.header("Link", f'<https://twitter.com/angelogladding/status/'
-                           f'30493490238590234>; rel="syndication"',
-                   add=True)
+                           f'30493490238590234>; rel="syndication"', add=True)
         raise web.Created("post created", location=permalink)
 
 
