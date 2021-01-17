@@ -64,7 +64,9 @@ class LocalClient:
             author = self.read("about")
         except IndexError:  # TODO bootstrap first post with first post
             author = deepcopy(resource)
-        # XXX author.pop("type")
+        else:
+            author["properties"].pop("author")
+            author["properties"].pop("published")
         resource["properties"].update(published=now, url=permalink,
                                       author=author)
         tx.db.insert("resources", resource=resource)
