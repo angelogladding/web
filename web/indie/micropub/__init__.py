@@ -54,6 +54,9 @@ class LocalClient:
 
     def create(self, url, resource):
         """Write a resource and return its permalink."""
+        print()
+        print(resource)
+        print()
         now = web.utcnow()
         nameslug = web.textslug(resource["properties"].get("name", "unknown"))
         permalink = "/" + url.format(dtslug=web.timeslug(now),
