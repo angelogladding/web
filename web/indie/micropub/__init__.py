@@ -93,7 +93,7 @@ class MicropubEndpoint:
     def _post(self):
         resource = tx.request.body._data
         if "bookmark-of" in resource["properties"]:
-            slug = "{dtslug}/grab-nameslug-from-cite"
+            slug = "{dtslug}/grab_nameslug_from_cite"
         permalink = LocalClient().create(slug, resource)
         web.header("Link", f'</blat>; rel="shortlink"', add=True)
         web.header("Link", f'<https://twitter.com/angelogladding/status/'
