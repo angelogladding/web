@@ -51,7 +51,7 @@ class LocalClient:
         """Return a list of all resources."""
         return tx.db.select("""resources, json_tree(resources.resource,
                                                     '$.properties.name')""",
-                            where="json_tree.type == 'array'",  # TODO er?
+                            where="json_tree.type == 'text'",
                             order="published desc")
 
     def create(self, url, resource):
