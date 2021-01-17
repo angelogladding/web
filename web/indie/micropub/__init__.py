@@ -1,5 +1,7 @@
 """Micropub server app and editor helper."""
 
+from copy import deepcopy
+
 import web
 from web import tx
 
@@ -54,9 +56,6 @@ class LocalClient:
 
     def create(self, url, resource):
         """Write a resource and return its permalink."""
-        print()
-        print(resource)
-        print()
         now = web.utcnow()
         nameslug = web.textslug(resource["properties"].get("name", "unknown"))
         permalink = "/" + url.format(dtslug=web.timeslug(now),
@@ -64,7 +63,7 @@ class LocalClient:
         try:
             author = self.read("about")
         except IndexError:  # TODO bootstrap first post with first post
-            author = dict(resource)
+            author = deepcopy(resource)
         author.pop("type")
         resource["properties"].update(published=now, url=permalink,
                                       author=author)
