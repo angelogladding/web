@@ -1,4 +1,4 @@
-$def with (clients, posts)
+$def with (clients, resources)
 $var title: Micropub Activity
 
 <h2>Clients</h2>
@@ -7,8 +7,8 @@ $for client in clients:
     <li>$client["client_id"]</li>
 </ul>
 
-<h2>Posts</h2>
+<h2>Resources</h2>
 <ul>
-$for post in posts:
-    <li>$post</li>
+$for resource in resources:
+    <li style=font-size:.75em;><pre>$pformat(dict(resource))</pre></li>
 </ul>
