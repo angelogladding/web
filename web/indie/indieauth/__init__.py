@@ -163,7 +163,7 @@ class SignIn:
             return f"can't reach https://{user_url}"
         auth_endpoint = web.uri(rels["authorization_endpoint"][0])
         token_endpoint = web.uri(rels["token_endpoint"][0])
-        micropub_endpoint = web.uri(rels["micropub_endpoint"][0])
+        micropub_endpoint = web.uri(rels["micropub"][0])
         tx.user.session["auth_endpoint"] = str(auth_endpoint)
         tx.user.session["token_endpoint"] = str(token_endpoint)
         tx.user.session["micropub_endpoint"] = str(micropub_endpoint)
