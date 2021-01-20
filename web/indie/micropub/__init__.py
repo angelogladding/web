@@ -64,7 +64,7 @@ class LocalClient:
                                                            nameslug=nameslug)
         try:
             author = self.read("")
-        except IndexError:  # TODO bootstrap first post with first post
+        except IndexError:
             author = deepcopy(resource)
         else:
             author["properties"].pop("author")
