@@ -59,7 +59,7 @@ class LocalClient:
         url = f"https://{tx.host.name}"
         if types == "h-card":
             if properties["uid"] == str(web.uri(tx.host.name)):
-                url = "/"
+                url += "/"
         elif types == "h-entry":
             def discover_post_type():
                 if "bookmark-of" in properties:
