@@ -46,17 +46,15 @@ class LocalClient:
 
     def read_all(self, limit=20):
         """Return a list of all resources."""
-        return tx.db.select("""resources, json_tree(resources.resource,
-                                                    '$.properties.name')""",
-                            where="json_tree.type == 'text'",
-                            order="published desc")
+        return tx.db.select("""resources""", order="url ASC")
 
     def recent_entries(self, limit=20):
         """Return a list of recent entries."""
         return tx.db.select("""resources, json_tree(resources.resource,
                                                     '$.type[0]')""",
                             where="json_tree.atom == 'h-entry'",
-                            order="published desc")
+                            order="""json_extract(resources.resource,
+                                     '$.properties.published') DESC""")
 
     def create(self, url, resource):
         """Write a resource and return its permalink."""
