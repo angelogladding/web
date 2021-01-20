@@ -27,6 +27,15 @@ def insert_references(handler, app):
         web.header("Link", f'</pub>; rel="micropub"', add=True)
 
 
+def discover_post_type(properties):
+    """Return the discovered post type."""
+    if "bookmark-of" in properties:
+        post_type = "bookmark"
+    else:
+        post_type = "note"
+    return post_type
+
+
 def send_request(payload):
     """Send a Micropub request to a Micropub server."""
     # TODO FIXME what's in the session?
@@ -61,12 +70,6 @@ class LocalClient:
             if properties["uid"] == str(web.uri(tx.host.name)):
                 pass
         elif types == "h-entry":
-            def discover_post_type():
-                if "bookmark-of" in properties:
-                    post_type = "bookmark"
-                else:
-                    post_type = "note"
-                return post_type
             post_type = discover_post_type()
             timeslug = web.timeslug(now)
             if post_type == "note":
