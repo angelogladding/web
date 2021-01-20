@@ -15,6 +15,7 @@ $for resource in resources:
     <li style=font-size:.75em;>
     <p><a href=$resource["url"]>$resource["url"]</a><br>
     <small>last modified $resource["modified"].diff_for_humans()</small></p>
-    <pre>$pformat(resource["resource"])</pre>
+    <p><strong>$", ".join(resource["resource"]["type"])</strong>:</p>
+    <pre>$pformat(resource["resource"]["properties"])</pre>
     </li>
 </ul>
