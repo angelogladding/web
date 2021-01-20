@@ -12,11 +12,7 @@ templates = web.templates(__name__)
 
 def insert_references(handler, app):
     """Ensure server links are in head of root document."""
-    tx.db.define(resources="""resource JSON,
-                              published TEXT AS (json_extract(resource,
-                                  '$.properties.published')) STORED,
-                              url TEXT AS (json_extract(resource,
-                                  '$.properties.url')) STORED""",
+    tx.db.define(resources="""url TEXT, resource JSON""",
                  syndication="""destination JSON NOT NULL""")
     tx.pub = LocalClient()
     yield
@@ -55,23 +51,34 @@ class LocalClient:
                             where="json_tree.type == 'text'",
                             order="published desc")
 
+    def recent_entries(self, limit=20):
+        """Return a list of recent entries."""
+        return tx.db.select("""resources, json_tree(resources.resource,
+                                                    '$.type[0]')""",
+                            where="json_tree.atom == 'h-entry'",
+                            order="published desc")
+
     def create(self, url, resource):
         """Write a resource and return its permalink."""
         now = web.utcnow()
         timeslug = web.timeslug(now)
-        nameslug = web.textslug(resource["properties"].get("name", "unknown"))
-        permalink = f"https://{tx.host.name}/{url}".format(timeslug=timeslug,
-                                                           nameslug=nameslug)
-        try:
-            author = self.read("")
-        except IndexError:
-            author = deepcopy(resource)
-        else:
-            author["properties"].pop("author")
-            author["properties"].pop("published")
-        resource["properties"].update(published=now, url=permalink,
-                                      author=author)
-        tx.db.insert("resources", resource=resource)
+        nameslug = web.textslug(resource["properties"].get("name", "???"))
+        permalink = f"https://{tx.host.name}"
+        if url:
+            permalink += "/" + url.format(timeslug=timeslug, nameslug=nameslug)
+        if "h-card" in resource["type"]:
+            pass
+        elif "h-entry" in resource["type"]:
+            try:
+                author = self.read("")
+            except IndexError:
+                author = deepcopy(resource)
+            else:
+                author["properties"].pop("author")
+                author["properties"].pop("published")
+            resource["properties"].update(published=now, url=permalink,
+                                          author=author)
+        tx.db.insert("resources", url=permalink, resource=resource)
         # TODO snapshot database
         return permalink
 
