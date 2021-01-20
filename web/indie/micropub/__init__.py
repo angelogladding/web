@@ -39,8 +39,8 @@ class LocalClient:
 
     def read(self, url):
         """Return a resource with its metadata."""
-        return tx.db.select("resources", where="url = ?",
-                            vals=[f"https://{tx.host.name}/{url}"])[0]
+        url = f"https://{tx.host.name}/{url}".rstrip("/")
+        return tx.db.select("resources", where="url = ?", vals=[url])[0]
 
     def read_all(self, limit=20):
         """Return a list of all resources."""
@@ -59,7 +59,7 @@ class LocalClient:
         url = f"https://{tx.host.name}"
         if types == "h-card":
             if properties["uid"] == str(web.uri(tx.host.name)):
-                url += "/"
+                pass
         elif types == "h-entry":
             def discover_post_type():
                 if "bookmark-of" in properties:

@@ -212,7 +212,7 @@ class HTTPURI(URI):
                 self.netloc += ":" + str(self.port)
             self.subdomain, self.domain, self.suffix = \
                 publicsuffix.split(parts.hostname)
-        self.path = self._normalize_path(parts.path)
+        self.path = self._normalize_path(parts.path).lstrip("/")
         self.query = urllib.parse.parse_qs(self._normalize_query(parts.query))
         self.fragment = self._normalize_fragment(parts.fragment)
 
