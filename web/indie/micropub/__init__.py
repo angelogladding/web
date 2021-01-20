@@ -10,7 +10,8 @@ templates = web.templates(__name__)
 
 def insert_references(handler, app):
     """Ensure server links are in head of root document."""
-    tx.db.define(resources="""url TEXT, modified DATETIME, resource JSON""",
+    tx.db.define(resources="""url TEXT, modified DATETIME, types TEXT,
+                              properties JSON""",
                  syndication="""destination JSON NOT NULL""")
     tx.pub = LocalClient()
     yield
@@ -38,40 +39,38 @@ class LocalClient:
 
     def read(self, url):
         """Return a resource with its metadata."""
-        permalink = f"https://{tx.host.name}"
-        if url:
-            permalink += f"/{url}"
-        return tx.db.select("resources", where="url = ?", vals=[permalink])[0]
+        return tx.db.select("resources", where="url = ?",
+                            vals=[f"https://{tx.host.name}/{url}"])[0]
 
     def read_all(self, limit=20):
         """Return a list of all resources."""
-        return tx.db.select("""resources""", order="url ASC")
+        return tx.db.select("resources", order="url ASC")
 
     def recent_entries(self, limit=20):
         """Return a list of recent entries."""
-        return tx.db.select("""resources, json_tree(resources.resource,
-                                                    '$.type[0]')""",
-                            where="json_tree.atom == 'h-entry'",
-                            order="""json_extract(resources.resource,
-                                     '$.properties.published') DESC""")
+        return tx.db.select("""resources""",
+                            where="types == 'h-entry'",
+                            order="""json_extract(resources.properties,
+                                     '$.published') DESC""")
 
-    def create(self, url, resource):
+    def create(self, types, properties):
         """Write a resource and return its permalink."""
         now = web.utcnow()
-        timeslug = web.timeslug(now)
-        nameslug = web.textslug(resource["properties"].get("content"))
-        permalink = f"https://{tx.host.name}"
-        if url:
-            permalink += "/" + url.format(timeslug=timeslug, nameslug=nameslug)
-        if "h-card" in resource["type"]:
-            pass
-        elif "h-entry" in resource["type"]:
+        url = f"https://{tx.host.name}"
+        if types == "h-card":
+            if properties["uid"] == str(web.uri(tx.host.name)):
+                url = "/"
+        elif types == "h-entry":
+            timeslug = web.timeslug(now)
+            note = True  # TODO ptd
+            if note:
+                contentslug = web.textslug(properties.get("content"))
+                url += f"{timeslug}/{contentslug}"
             author = self.read("")["resource"]["properties"]
-            resource["properties"].update(published=now, url=permalink,
-                                          author=author)
-        tx.db.insert("resources", url=permalink, modified=now,
-                     resource=resource)
-        return permalink
+            properties.update(published=now, url=url, author=author)
+        tx.db.insert("resources", url=url, modified=now, types=types,
+                     properties=properties)
+        return url
 
 
 @server.route(r"")
