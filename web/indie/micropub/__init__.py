@@ -12,7 +12,7 @@ templates = web.templates(__name__)
 
 def insert_references(handler, app):
     """Ensure server links are in head of root document."""
-    tx.db.define(resources="""url TEXT, resource JSON""",
+    tx.db.define(resources="""url TEXT, modified DATETIME, resource JSON""",
                  syndication="""destination JSON NOT NULL""")
     tx.pub = LocalClient()
     yield
@@ -40,9 +40,10 @@ class LocalClient:
 
     def read(self, url):
         """Return a resource with its metadata."""
-        url = f"https://{tx.host.name}/{url}"
-        return tx.db.select("resources", where="url = ?", vals=["/" + url],
-                            order="published DESC", limit=1)[0]["resource"]
+        permalink = f"https://{tx.host.name}"
+        if url:
+            permalink += f"/{url}"
+        return tx.db.select("resources", where="url = ?", vals=[permalink])[0]
 
     def read_all(self, limit=20):
         """Return a list of all resources."""
