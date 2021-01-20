@@ -72,7 +72,7 @@ class LocalClient:
             if post_type == "note":
                 textslug = properties["content"]
             elif post_type == "bookmark":
-                textslug = properties["bookmark-of"]["properties"]["name"]
+                textslug = properties["bookmark-of"][0]["properties"]["name"]
             url += f"/{timeslug}/{web.textslug(textslug)}"
             author = {"type": ["h-card"],
                       "properties": self.read("")["properties"]}
