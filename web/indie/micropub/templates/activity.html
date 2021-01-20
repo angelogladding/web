@@ -14,7 +14,7 @@ $for client in clients:
 $for resource in resources:
     <li style=font-size:.75em;>
     <p><a href=$resource["url"]>$resource["url"]</a><br>
-    <small><strong>$", ".join(resource["type"])</strong>
+    <small><strong>$", ".join(resource["types"])</strong>
     last modified $resource["modified"].diff_for_humans()</small></p>
     <pre>$pformat(resource["properties"])</pre>
     </li>
