@@ -61,12 +61,20 @@ class LocalClient:
             if properties["uid"] == str(web.uri(tx.host.name)):
                 url = "/"
         elif types == "h-entry":
+            def discover_post_type():
+                if "bookmark-of" in properties:
+                    post_type = "bookmark"
+                else:
+                    post_type = "note"
+                return post_type
+            post_type = discover_post_type()
             timeslug = web.timeslug(now)
-            note = True  # TODO ptd
-            if note:
-                contentslug = web.textslug(properties.get("content"))
-                url += f"{timeslug}/{contentslug}"
-            author = self.read("")["resource"]["properties"]
+            if post_type == "note":
+                textslug = properties["content"]
+            elif post_type == "bookmark":
+                textslug = properties["bookmark-of"]["properties"]["name"]
+            url += f"{timeslug}/{web.textslug(textslug)}"
+            author = self.read("")["properties"]
             properties.update(published=now, url=url, author=author)
         tx.db.insert("resources", url=url, modified=now, types=types,
                      properties=properties)
@@ -93,9 +101,8 @@ class MicropubEndpoint:
 
     def _post(self):
         resource = tx.request.body._data
-        if "bookmark-of" in resource["properties"]:
-            slug = "{dtslug}/grab_nameslug_from_cite"
-        permalink = LocalClient().create(slug, resource)
+        permalink = LocalClient().create(resource["type"],
+                                         resource["properties"])
         web.header("Link", f'</blat>; rel="shortlink"', add=True)
         web.header("Link", f'<https://twitter.com/angelogladding/status/'
                            f'30493490238590234>; rel="syndication"', add=True)
