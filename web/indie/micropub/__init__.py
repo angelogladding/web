@@ -58,9 +58,9 @@ class LocalClient:
     def create(self, url, resource):
         """Write a resource and return its permalink."""
         now = web.utcnow()
-        dtslug = web.timeslug(now)
+        timeslug = web.timeslug(now)
         nameslug = web.textslug(resource["properties"].get("name", "unknown"))
-        permalink = f"https://{tx.host.name}/{url}".format(dtslug=dtslug,
+        permalink = f"https://{tx.host.name}/{url}".format(timeslug=timeslug,
                                                            nameslug=nameslug)
         try:
             author = self.read("")
