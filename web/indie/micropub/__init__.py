@@ -102,8 +102,7 @@ class MicropubEndpoint:
 
     def _post(self):
         resource = tx.request.body._data
-        print(resource)
-        permalink = LocalClient().create(resource["type"],
+        permalink = LocalClient().create(" ".join(resource["type"]),
                                          resource["properties"])
         web.header("Link", f'</blat>; rel="shortlink"', add=True)
         web.header("Link", f'<https://twitter.com/angelogladding/status/'
