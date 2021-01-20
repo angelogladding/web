@@ -59,7 +59,7 @@ class LocalClient:
         """Write a resource and return its permalink."""
         now = web.utcnow()
         timeslug = web.timeslug(now)
-        nameslug = web.textslug(resource["properties"].get("name", "???"))
+        nameslug = web.textslug(resource["properties"].get("content"))
         permalink = f"https://{tx.host.name}"
         if url:
             permalink += "/" + url.format(timeslug=timeslug, nameslug=nameslug)
