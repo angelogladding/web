@@ -73,7 +73,7 @@ class LocalClient:
                 textslug = properties["content"]
             elif post_type == "bookmark":
                 textslug = properties["bookmark-of"]["properties"]["name"]
-            url += f"{timeslug}/{web.textslug(textslug)}"
+            url += f"/{timeslug}/{web.textslug(textslug)}"
             author = self.read("")["properties"]
             properties.update(published=now, url=url, author=author)
         tx.db.insert("resources", url=url, modified=now, types=types,
