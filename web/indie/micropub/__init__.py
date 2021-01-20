@@ -44,6 +44,7 @@ class LocalClient:
 
     def read(self, url):
         """Return a resource with its metadata."""
+        url = f"https://{tx.host.name}/{url}"
         return tx.db.select("resources", where="url = ?", vals=["/" + url],
                             order="published DESC", limit=1)[0]["resource"]
 
@@ -57,11 +58,12 @@ class LocalClient:
     def create(self, url, resource):
         """Write a resource and return its permalink."""
         now = web.utcnow()
+        dtslug = web.timeslug(now)
         nameslug = web.textslug(resource["properties"].get("name", "unknown"))
-        permalink = "/" + url.format(dtslug=web.timeslug(now),
-                                     nameslug=nameslug)
+        permalink = f"https://{tx.host.name}/{url}".format(dtslug=dtslug,
+                                                           nameslug=nameslug)
         try:
-            author = self.read("about")
+            author = self.read("")
         except IndexError:  # TODO bootstrap first post with first post
             author = deepcopy(resource)
         else:
