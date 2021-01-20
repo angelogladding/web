@@ -1,7 +1,5 @@
 """Micropub server app and editor helper."""
 
-from copy import deepcopy
-
 import web
 from web import tx
 
@@ -68,17 +66,11 @@ class LocalClient:
         if "h-card" in resource["type"]:
             pass
         elif "h-entry" in resource["type"]:
-            try:
-                author = self.read("")
-            except IndexError:
-                author = deepcopy(resource)
-            else:
-                author["properties"].pop("author")
-                author["properties"].pop("published")
+            author = self.read("")["resource"]["properties"]
             resource["properties"].update(published=now, url=permalink,
                                           author=author)
-        tx.db.insert("resources", url=permalink, resource=resource)
-        # TODO snapshot database
+        tx.db.insert("resources", url=permalink, modified=now,
+                     resource=resource)
         return permalink
 
 
