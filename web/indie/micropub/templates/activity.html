@@ -12,5 +12,5 @@ $for client in clients:
 <h2>Resources</h2>
 <ul>
 $for resource in resources:
-    <li style=font-size:.75em;><pre>$pformat(resource)</pre></li>
+    <li style=font-size:.75em;><pre>$pformat(dict(resource))</pre></li>
 </ul>
