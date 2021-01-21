@@ -198,4 +198,6 @@ class MediaFile:
     """."""
 
     def _get(self):
+        if self.filename.endswith((".jpg", ".jpeg")):
+            web.header("Content-Type", "image/jpeg")
         web.header("X-Accel-Redirect", f"/X/{tx.host.name}/{self.filename}")
