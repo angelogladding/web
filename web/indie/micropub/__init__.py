@@ -177,7 +177,7 @@ class MediaEndpoint:
             fid = web.nbrandom(4)
             filename = media_dir / fid
             if not filename.exists():
-                web.form("file").file.save(filename)
+                filename = web.form("file").file.save(filename)
                 break
         sha256 = str(sh.sha256sum(filename)).split()[0]
         tx.db.insert("files", fid=fid, sha256=sha256,
