@@ -1,7 +1,8 @@
 """Micropub server app and editor helper."""
 
-import os
+import pathlib
 
+import sh
 import web
 from web import tx
 
@@ -14,6 +15,7 @@ def insert_references(handler, app):
     """Ensure server links are in head of root document."""
     tx.db.define(resources="""url TEXT, modified DATETIME, types TEXT,
                               properties JSON""",
+                 files="""fid TEXT, sha256 TEXT, size INTEGER""",
                  syndication="""destination JSON NOT NULL""")
     tx.pub = LocalClient()
     yield
@@ -162,15 +164,26 @@ class MediaEndpoint:
     """."""
 
     def _get(self):
-        return "media files.."
+        return list(pathlib.Path(tx.host.name).iterdir())
 
     def _post(self):
-        # XXX resource = tx.request.body._data
-        print()
-        file = web.form("file").file
-        print(file)
-        print(dir(file))
-        print(file.name)
-        print()
-        print(file.save("./FROM_THE_PUB.jpeg"))
-        print(os.getcwd())
+        media_dir = pathlib.Path(tx.host.name)
+        media_dir.mkdir(exist_ok=True, parents=True)
+        while True:
+            fid = web.nbrandom(4)
+            filename = media_dir / fid
+            if not filename.exists():
+                web.form("file").file.save(filename)
+                break
+        sha256 = str(sh.sha256sum(filename)).split()[0]
+        tx.db.insert("files", fid=fid, sha256=sha256,
+                     size=filename.stat().st_size)
+        raise web.Created("file created", location=f"/pub/media/{fid}")
+
+
+@server.route(r"media/{fid}")
+class MediaFile:
+    """."""
+
+    def _get(self):
+        return f"config NGINX for an X-Redirect to {self.fid}"
