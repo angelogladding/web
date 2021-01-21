@@ -1016,8 +1016,8 @@ class Application:
             return []
         if isinstance(tx.response.body, bytes):
             return [tx.response.body]
-        # XXX elif isinstance(tx.response.body, dict):
-        # XXX     return [bytes(yaml.dump(tx.response.body), "utf-8")]
+        elif tx.response.headers.get("content-type") == "application/json":
+            return [bytes(json.dump(tx.response.body), "utf-8")]
         return [bytes(str(tx.response.body), "utf-8")]
 
     def get_controller(self, path):
