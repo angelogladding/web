@@ -172,5 +172,5 @@ class MediaEndpoint:
         print(dir(file))
         print(file.name)
         print()
-        print(file.save("."))
+        print(file.save("./FROM_THE_PUB.jpeg"))
         print(os.getcwd())
