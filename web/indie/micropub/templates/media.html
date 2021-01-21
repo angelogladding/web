@@ -1,0 +1,14 @@
+$def with (files)
+$var title: Micropub Media Files
+
+<h1>Media Files</h1>
+
+<form action=/media/pub method=post>
+<input name=file type=file>
+<button>Upload</button>
+</form>
+
+<ul>
+$for file in files:
+    <li><a href=/media/pub/$file.name>$file.name</a> <small>$(file.stat().st_size / 1024)kb</small></li>
+</ul>
