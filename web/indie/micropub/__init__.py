@@ -88,6 +88,10 @@ class LocalClient:
                      properties=properties)
         return url
 
+    def get_files(self):
+        """Return list of media files."""
+        return list(pathlib.Path(tx.host.name).iterdir())
+
 
 @server.route(r"")
 class MicropubEndpoint:
@@ -164,7 +168,7 @@ class MediaEndpoint:
     """."""
 
     def _get(self):
-        return list(pathlib.Path(tx.host.name).iterdir())
+        return LocalClient().get_files()
 
     def _post(self):
         media_dir = pathlib.Path(tx.host.name)
