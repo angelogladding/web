@@ -15,7 +15,8 @@ def insert_references(handler, app):
     """Ensure server links are in head of root document."""
     tx.db.define(resources="""url TEXT, modified DATETIME, types TEXT,
                               properties JSON""",
-                 files="""fid TEXT, sha256 TEXT, size INTEGER""",
+                 files="""fid TEXT UNIQUE, sha256 TEXT UNIQUE,
+                          size INTEGER""",
                  syndication="""destination JSON NOT NULL""")
     tx.pub = LocalClient()
     yield
@@ -180,9 +181,15 @@ class MediaEndpoint:
                 filename = web.form("file").file.save(filename)
                 break
         sha256 = str(sh.sha256sum(filename)).split()[0]
-        tx.db.insert("files", fid=fid, sha256=sha256,
-                     size=filename.stat().st_size)
-        raise web.Created("file created", location=f"/pub/media/{fid}")
+        try:
+            tx.db.insert("files", fid=fid, sha256=sha256,
+                         size=filename.stat().st_size)
+        except tx.db.IntegrityError:
+            fid = tx.db.select("files", where="sha256 = ?",
+                               vals=[sha256])[0]["fid"]
+        path = f"/pub/media/{fid}"
+        raise web.Created("File can be found at <a href={path}>{path}</a>",
+                          location=path)
 
 
 @server.route(r"media/{fid}")
