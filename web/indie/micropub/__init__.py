@@ -7,7 +7,8 @@ import web
 from web import tx
 
 
-server = web.application("MicropubServer", mount_prefix="pub", fid=r"\w{4}")
+server = web.application("MicropubServer", mount_prefix="pub",
+                         filename=r"\w{4}")
 templates = web.templates(__name__)
 
 
@@ -192,9 +193,9 @@ class MediaEndpoint:
                           location=path)
 
 
-@server.route(r"media/{fid}")
+@server.route(r"media/{filename}")
 class MediaFile:
     """."""
 
     def _get(self):
-        return f"config NGINX for an X-Redirect to {self.fid}"
+        web.header("X-Accel-Redirect", f"/X/{tx.host.name}/{self.filename}")
