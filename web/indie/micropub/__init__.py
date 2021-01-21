@@ -210,3 +210,4 @@ class MediaFile:
         filepath = LocalClient().get_file(self.filename)
         tx.db.delete("files", where="fid = ?", vals=[filepath.stem])
         filepath.unlink()
+        return "deleted"
