@@ -7,7 +7,7 @@ import web
 from web import tx
 
 
-server = web.application("MicropubServer", mount_prefix="pub")
+server = web.application("MicropubServer", mount_prefix="pub", fid=r"\w{4}")
 templates = web.templates(__name__)
 
 
