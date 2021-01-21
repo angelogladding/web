@@ -160,7 +160,7 @@ class MediaEndpoint:
     """."""
 
     def _get(self):
-        return "media endpoint.."
+        return "media files.."
 
     def _post(self):
         # XXX resource = tx.request.body._data
