@@ -1,4 +1,4 @@
-$def with (clients, resources)
+$def with (clients, resources, files)
 $var title: Micropub Activity
 
 <h1>Micropub Activity</h1>
@@ -9,13 +9,19 @@ $for client in clients:
     <li>$client["client_id"]</li>
 </ul>
 
-<h2>Resources</h2>
+<h2>Content Resources</h2>
 <ul>
 $for resource in resources:
-    <li style=font-size:.75em;>
+    <li>
     <p><a href=$resource["url"]>$resource["url"]</a><br>
     <small><strong>$"/".join(resource["types"].split())</strong>
     last modified $resource["modified"].diff_for_humans()</small></p>
     <pre>$pformat(resource["properties"])</pre>
     </li>
+</ul>
+
+<h2>Media Files</h2>
+<ul>
+$for file in files:
+    <li>$file</li>
 </ul>

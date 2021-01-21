@@ -94,8 +94,10 @@ class MicropubEndpoint:
             form = web.form("q")
         except web.BadRequest:
             clients = tx.db.select("auths", what="DISTINCT client_id")
-            resources = LocalClient().read_all()
-            return templates.activity(clients, resources)
+            local_client = LocalClient()
+            resources = local_client.read_all()
+            files = local_client.get_files()
+            return templates.activity(clients, resources, files)
         syndication_endpoints = []
         if form.q == "config":
             web.header("Content-Type", "application/json")
@@ -159,3 +161,11 @@ class MediaEndpoint:
 
     def _get(self):
         return "media endpoint.."
+
+    def _post(self):
+        # XXX resource = tx.request.body._data
+        print()
+        file = web.form("file").file
+        print(file)
+        print(dir(file))
+        print()
