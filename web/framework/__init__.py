@@ -1017,7 +1017,7 @@ class Application:
         if isinstance(tx.response.body, bytes):
             return [tx.response.body]
         elif tx.response.headers.get("content-type") == "application/json":
-            return [bytes(json.dump(tx.response.body), "utf-8")]
+            return [bytes(json.dumps(tx.response.body), "utf-8")]
         return [bytes(str(tx.response.body), "utf-8")]
 
     def get_controller(self, path):
