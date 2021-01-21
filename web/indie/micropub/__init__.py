@@ -15,8 +15,7 @@ def insert_references(handler, app):
     """Ensure server links are in head of root document."""
     tx.db.define(resources="""url TEXT, modified DATETIME, types TEXT,
                               properties JSON""",
-                 files="""fid TEXT UNIQUE, sha256 TEXT UNIQUE,
-                          size INTEGER""",
+                 files="""fid TEXT, sha256 TEXT UNIQUE, size INTEGER""",
                  syndication="""destination JSON NOT NULL""")
     tx.pub = LocalClient()
     yield
