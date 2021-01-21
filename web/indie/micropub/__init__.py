@@ -100,7 +100,7 @@ class MicropubEndpoint:
         if form.q == "config":
             web.header("Content-Type", "application/json")
             return {"q": ["category", "contact", "source", "syndicate-to"],
-                    "media-endpoint": "/pub/media",
+                    "media-endpoint": f"https://{tx.host.name}/pub/media",
                     "syndicate-to": syndication_endpoints}
         return "unsupported `q` command"
 
