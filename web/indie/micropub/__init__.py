@@ -186,8 +186,9 @@ class MediaEndpoint:
         except tx.db.IntegrityError:
             fid = tx.db.select("files", where="sha256 = ?",
                                vals=[sha256])[0]["fid"]
+            filename.unlink()
         path = f"/pub/media/{fid}"
-        raise web.Created("File can be found at <a href={path}>{path}</a>",
+        raise web.Created(f"File can be found at <a href={path}>{path}</a>",
                           location=path)
 
 
