@@ -1,5 +1,7 @@
 """Micropub server app and editor helper."""
 
+import os
+
 import web
 from web import tx
 
@@ -168,4 +170,7 @@ class MediaEndpoint:
         file = web.form("file").file
         print(file)
         print(dir(file))
+        print(file.name)
         print()
+        print(file.save("."))
+        print(os.getcwd())
