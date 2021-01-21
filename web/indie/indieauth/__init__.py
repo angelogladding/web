@@ -2,7 +2,6 @@
 
 import base64
 import hashlib
-import json
 
 import web
 from web import tx
@@ -139,7 +138,7 @@ class TokenEndpoint:
         tx.db.update("auths", response=response,
                      where="code = ?", vals=[auth["code"]])
         web.header("Content-Type", "application/json")
-        return json.dumps(response)
+        return response
 
     def is_token_request(self, scope):
         """Determine whether the list of scopes dictates a token reuqest."""

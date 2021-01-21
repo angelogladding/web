@@ -19,6 +19,7 @@ import datetime
 # import errno
 import getpass
 import hashlib
+import hmac
 import inspect
 import io
 import json
@@ -34,6 +35,7 @@ import time
 import urllib
 import wsgiref.util
 
+import Crypto.Random
 import Crypto.Random.random
 import kv
 import lxml
@@ -41,6 +43,7 @@ import lxml.html
 import mm
 from mm import Template
 import pendulum
+import scrypt
 import sh
 import sql
 import unidecode
@@ -80,7 +83,7 @@ __all__ = ["application", "serve", "anti_csrf", "form", "secure_form",
            "default_session_timeout", "uwsgi", "textslug", "get_host_hash",
            "config_servers", "b64encode", "b64decode", "timeslug",
            "enqueue", "run_redis", "kill_redis", "get_apps", "nb60_re",
-           "wordlist"]
+           "wordlist", "generate_passphrase", "verify_passphrase"]
 
 kvdb = kv.db("web", ":", {"auth:secret": "string",
                           "auth:nonces": "set",
@@ -1407,6 +1410,32 @@ def get_job_signature(callable, *args, **kwargs):
 
 
 # TODO gevent websockets
+
+
+def generate_passphrase():
+    """
+    Generate a new randomly-generated wordlist passphrase.
+
+    `passphrase_words` is a list of generated words
+
+    """
+    passphrase_words = list()
+    while len(passphrase_words) < 7:
+        passphrase_words.append(random.choice(wordlist))
+    passphrase = "".join(passphrase_words)
+    salt = Crypto.Random.get_random_bytes(64)
+    scrypt_hash = scrypt.hash(passphrase, salt)
+    return salt, scrypt_hash, passphrase_words
+
+
+def verify_passphrase(salt, scrypt_hash, passphrase):
+    """
+    Verify passphrase.
+
+    `passphrase` should be concatenation of generated words, without spaces
+    
+    """
+    return hmac.compare_digest(scrypt.hash(passphrase, salt), scrypt_hash)
 
 
 # EFF's large wordlist for passphrase generation.
