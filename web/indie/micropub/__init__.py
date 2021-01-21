@@ -169,7 +169,7 @@ class MediaEndpoint:
     """."""
 
     def _get(self):
-        return LocalClient().get_files()
+        return templates.media(LocalClient().get_files())
 
     def _post(self):
         media_dir = pathlib.Path(tx.host.name)
