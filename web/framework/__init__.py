@@ -507,6 +507,7 @@ class File:
         """
 
         """
+        filepath = pathlib.Path(filepath)
         # TODO handle required
         required = options.pop("required", False)
         if required:
