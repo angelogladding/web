@@ -202,8 +202,12 @@ class MediaFile:
     """."""
 
     def _get(self):
-        if self.filename.endswith((".jpg", ".jpeg")):
-            web.header("Content-Type", "image/jpeg")
+        content_types = {(".jpg", ".jpeg"): "image/jpg",
+                         ".mp4": "video/mp4"}
+        for suffix, content_type in content_types.items():
+            if self.filename.endswith(suffix):
+                web.header("Content-Type", content_type)
+                break
         web.header("X-Accel-Redirect", f"/X/{tx.host.name}/{self.filename}")
 
     def _delete(self):
