@@ -93,6 +93,10 @@ class LocalClient:
         """Return list of media files."""
         return list(pathlib.Path(tx.host.name).iterdir())
 
+    def get_file(self, filename):
+        """Return a media file."""
+        return pathlib.Path(tx.host.name) / filename
+
 
 @server.route(r"")
 class MicropubEndpoint:
@@ -201,3 +205,8 @@ class MediaFile:
         if self.filename.endswith((".jpg", ".jpeg")):
             web.header("Content-Type", "image/jpeg")
         web.header("X-Accel-Redirect", f"/X/{tx.host.name}/{self.filename}")
+
+    def _delete(self):
+        filepath = LocalClient().get_file(self.filename)
+        tx.db.delete("files", where="fid = ?", vals=[filepath.stem])
+        filepath.unlink()
