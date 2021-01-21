@@ -70,7 +70,7 @@ class LocalClient:
             if properties["uid"] == str(web.uri(tx.host.name)):
                 pass
         elif types == "h-entry":
-            post_type = discover_post_type()
+            post_type = discover_post_type(properties)
             timeslug = web.timeslug(now)
             if post_type == "note":
                 textslug = properties["content"]
