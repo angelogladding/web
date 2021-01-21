@@ -98,6 +98,7 @@ class MicropubEndpoint:
             return templates.activity(clients, resources)
         syndication_endpoints = []
         if form.q == "config":
+            web.header("Content-Type", "application/json")
             return {"q": ["category", "contact", "source", "syndicate-to"],
                     "media-endpoint": "/pub/media",
                     "syndicate-to": syndication_endpoints}
