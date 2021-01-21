@@ -8,7 +8,7 @@ from web import tx
 
 
 server = web.application("MicropubServer", mount_prefix="pub",
-                         filename=r"\w{4}")
+                         filename=rf"{web.nb60_re}{{4}}.\w{{1,10}}")
 templates = web.templates(__name__)
 
 
