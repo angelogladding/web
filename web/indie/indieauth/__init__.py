@@ -206,7 +206,7 @@ class Authorize:
                    "code_verifier": tx.user.session["code_verifier"]}
         response = web.post(tx.user.session["token_endpoint"],
                             headers={"Accept": "application/json"},
-                            data=payload).json()
+                            data=payload).json
         profile = response.get("profile", {})
         tx.db.insert("users", url=response["me"], name=profile.get("name"),
                      email=profile.get("email"),
