@@ -174,7 +174,8 @@ class SignIn:
         auth_endpoint["response_type"] = "code"
         auth_endpoint["state"] = web.nbrandom(16)
         tx.user.session["code_verifier"] = code_verifier = web.nbrandom(64)
-        code_challenge = hashlib.sha256(code_verifier).hexdigest()
+        code_challenge = \
+            hashlib.sha256(code_verifier.encode("ascii")).hexdigest()
         auth_endpoint["code_challenge"] = base64.b64encode(code_challenge)
         auth_endpoint["code_challenge_method"] = "S256"
         auth_endpoint["scope"] = "create draft update delete profile email"
