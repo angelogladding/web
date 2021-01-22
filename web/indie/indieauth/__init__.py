@@ -71,8 +71,8 @@ class AuthorizationEndpoint:
                             "state", "code_challenge", "code_challenge_method",
                             scope="")
         except web.BadRequest:
-            active = tx.db.select("auths", where="revoked = ?", vals=[None])
-            revoked = tx.db.select("auths", where="revoked != ?", vals=[None])
+            active = tx.db.select("auths", where="revoked is null")
+            revoked = tx.db.select("auths", where="revoked not null")
             return templates.authorizations(active, revoked)
         client, developer = get_client(form.client_id)
         tx.user.session["client_id"] = form.client_id
