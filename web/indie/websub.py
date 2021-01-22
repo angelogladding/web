@@ -8,7 +8,7 @@ pub = web.application("WebSubPublisher", mount_prefix="hub")
 sub = web.application("WebSubSubscriber", mount_prefix="subscriptions")
 
 
-def insert_references(handler, app):
+def wrap_hub(handler, app):
     """Ensure server links are in head of root document."""
     yield
     if tx.request.uri.path == "":
