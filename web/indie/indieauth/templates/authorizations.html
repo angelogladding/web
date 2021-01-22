@@ -11,9 +11,10 @@ $for auth in active:
     <p>$", ".join(r["scope"].split())</p>
     $if "profile" in r:
         <p>$r["profile"]</p>
-    $# $if "access_token" in r:
-    $#     <p>$r["access_token"]</p>
-    $# $ revoked = auth["revoked"]
+    $if "access_token" in r:
+        <p>$r["access_token"]</p>
+    $ revoked = auth["revoked"]
+    $revoked
     $# $if revoked:
     $#     <p><em><strong>revoked $revoked</strong></em></p>
 
