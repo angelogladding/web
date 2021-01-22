@@ -13,7 +13,7 @@ $for auth in active:
         <p>$r["profile"]</p>
     $if "access_token" in r:
         <p>$r["access_token"]</p>
-    $dict(auth)["revoked"]
+    $auth["revoked"]
     $# $ revoked = auth["revoked"]
     $# $if revoked:
     $#     <p><em><strong>revoked $revoked</strong></em></p>
