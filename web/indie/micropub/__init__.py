@@ -12,7 +12,7 @@ server = web.application("MicropubServer", mount_prefix="pub",
 templates = web.templates(__name__)
 
 
-def insert_references(handler, app):
+def wrap_server(handler, app):
     """Ensure server links are in head of root document."""
     tx.db.define(resources="""url TEXT, modified DATETIME, types TEXT,
                               properties JSON""",
