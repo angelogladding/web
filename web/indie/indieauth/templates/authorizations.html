@@ -8,10 +8,9 @@ $for auth in active:
     <p>$auth["client_id"]<br><small>$auth["redirect_uri"]<br>
     $auth["initiated"]</small></p>
     $ r = auth["response"]
-    $r
-    $# <p>$", ".join(r["scope"].split())</p>
-    $# $if "profile" in r:
-    $#     <p>$r["profile"]</p>
+    <p>$", ".join(r["scope"].split())</p>
+    $if "profile" in r:
+        <p>$r["profile"]</p>
     $# $if "access_token" in r:
     $#     <p>$r["access_token"]</p>
     $# $ revoked = auth["revoked"]
