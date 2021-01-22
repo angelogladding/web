@@ -12,7 +12,7 @@ client = web.application("IndieAuthClient", mount_prefix="user")
 templates = web.templates(__name__)
 
 
-def insert_references(handler, app):
+def wrap_server(handler, app):
     """Ensure server links are in head of root document."""
     tx.db.define(auths="""initiated DATETIME NOT NULL DEFAULT
                               CURRENT_TIMESTAMP, revoked DATETIME,
@@ -32,6 +32,14 @@ def insert_references(handler, app):
             tx.response.body = doc.html
         web.header("Link", f'</auth>; rel="authorization_endpoint"', add=True)
         web.header("Link", f'</auth/token>; rel="token_endpoint"', add=True)
+
+
+def wrap_client(handler, app):
+    """Ensure client database contains user table."""
+    tx.db.define(users="""account_created DATETIME NOT NULL DEFAULT
+                              CURRENT_TIMESTAMP, url TEXT, name TEXT,
+                          email TEXT, access_token TEXT""")
+    yield
 
 
 def get_client(client_id):
@@ -57,7 +65,7 @@ def get_client(client_id):
                 client = {"name": item["properties"]["name"][0],
                           "url": "https://todo.example"}
                 break
-            author = {"name": "TODO", "url": "https://todo.example"}
+            author = {"name": "NAME", "url": "URL"}  # TODO
     return client, author
 
 
@@ -128,9 +136,9 @@ class TokenEndpoint:
         response = auth["response"]
         scope = response["scope"].split()
         if "profile" in scope:
-            profile = {"name": "TODO NAME"}
+            profile = {"name": "NAME"}  # TODO
             if "email" in scope:
-                profile["email"] = "TODO EMAIL"
+                profile["email"] = "EMAIL"  # TODO
             response["profile"] = profile
         if scope and self.is_token_request(scope):
             response.update(access_token=web.nbrandom(12),
@@ -152,15 +160,13 @@ class SignIn:
 
     def _get(self):
         try:
-            user_url = web.form("me").me
+            form = web.form("me", return_url="/")
         except web.BadRequest:
             return templates.identify(tx.host.name)
-        # if not user_url.startswith("https://"):
-        #     user_url = "https://" + user_url
         try:
-            rels = web.get(user_url).mf2json["rels"]
+            rels = web.get(form.me).mf2json["rels"]
         except web.ConnectionError:
-            return f"can't reach https://{user_url}"
+            return f"can't reach https://{form.me}"
         auth_endpoint = web.uri(rels["authorization_endpoint"][0])
         token_endpoint = web.uri(rels["token_endpoint"][0])
         micropub_endpoint = web.uri(rels["micropub"][0])
@@ -168,18 +174,20 @@ class SignIn:
         tx.user.session["token_endpoint"] = str(token_endpoint)
         tx.user.session["micropub_endpoint"] = str(micropub_endpoint)
         client_id = web.uri(f"http://{tx.host.name}:{tx.host.port}")
-        auth_endpoint["me"] = user_url
-        auth_endpoint["client_id"] = client_id
-        auth_endpoint["redirect_uri"] = client_id / "user/sign-in/auth"
+        auth_endpoint["me"] = form.me
+        auth_endpoint["client_id"] = tx.user.session["client_id"] = client_id
+        auth_endpoint["redirect_uri"] = tx.user.session["redirect_uri"] = \
+            client_id / "user/sign-in/auth"
         auth_endpoint["response_type"] = "code"
-        auth_endpoint["state"] = web.nbrandom(16)
-        tx.user.session["code_verifier"] = code_verifier = web.nbrandom(64)
+        auth_endpoint["state"] = tx.user.session["state"] = web.nbrandom(16)
+        code_verifier = tx.user.session["code_verifier"] = web.nbrandom(64)
         code_challenge = \
             hashlib.sha256(code_verifier.encode("ascii")).hexdigest()
         auth_endpoint["code_challenge"] = \
             base64.b64encode(code_challenge.encode("ascii"))
         auth_endpoint["code_challenge_method"] = "S256"
         auth_endpoint["scope"] = "create draft update delete profile email"
+        tx.user.session["return_to"] = form.return_to
         raise web.SeeOther(auth_endpoint)
 
 
@@ -188,12 +196,23 @@ class Authorize:
     """IndieAuth client authorization."""
 
     def _get(self):
-        # form = web.form("state", "code")
-        # verify state
-        # request token from token_endpoint using `code`
-        tx.user.session["me"] = "http://alice.example"
-        # TODO return_to="/"
-        raise web.SeeOther("/")
+        form = web.form("state", "code")
+        if form.state != tx.user.session["state"]:
+            raise web.BadRequest("bad state")
+        payload = {"grant_type": "authorization_code",
+                   "code": form.code,
+                   "client_id": tx.user.session["client_id"],
+                   "redirect_uri": tx.user.session["redirect_uri"],
+                   "code_verifier": tx.user.session["code_verifier"]}
+        response = web.post(tx.user.session["token_endpoint"],
+                            headers={"Accept": "application/json"},
+                            data=payload).json()
+        profile = response.get("profile", {})
+        tx.db.insert("users", url=response["me"], name=profile.get("name"),
+                     email=profile.get("email"),
+                     access_token=response["access_token"])
+        tx.user.session["me"] = response["me"]
+        raise web.SeeOther(tx.user.session["return_to"])
 
 
 @client.route(r"sign-out")

@@ -26,7 +26,7 @@ def send_mention(source, target, private=False) -> None:
     web.post(endpoint, data=payload)
 
 
-def insert_references(handler, app):
+def wrap(handler, app):
     """Ensure endpoint link in head of root document."""
     tx.db.define(mentions="""received DATETIME NOT NULL DEFAULT
                                CURRENT_TIMESTAMP,

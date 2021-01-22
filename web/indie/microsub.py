@@ -8,7 +8,7 @@ server = web.application("MicrosubServer", mount_prefix="sub")
 reader = web.application("MicrosubReader", mount_prefix="reader")
 
 
-def insert_references(handler, app):
+def wrap_server(handler, app):
     """Ensure server links are in head of root document."""
     yield
     if tx.request.uri.path == "":
