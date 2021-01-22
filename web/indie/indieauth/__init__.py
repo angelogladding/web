@@ -133,7 +133,7 @@ class TokenEndpoint:
                 profile["email"] = "TODO EMAIL"
             response["profile"] = profile
         if scope and self.is_token_request(scope):
-            response.update(access_token=web.nbrandom(16),
+            response.update(access_token=web.nbrandom(12),
                             token_type="Bearer")
         response["me"] = f"https://{tx.request.uri.host}"
         tx.db.update("auths", response=response,
@@ -170,11 +170,14 @@ class SignIn:
         client_id = web.uri(f"http://{tx.host.name}:{tx.host.port}")
         auth_endpoint["me"] = user_url
         auth_endpoint["client_id"] = client_id
-        # TODO don't hardcode the following
         auth_endpoint["redirect_uri"] = client_id / "user/sign-in/auth"
         auth_endpoint["response_type"] = "code"
-        auth_endpoint["state"] = web.nbrandom(10)
-        auth_endpoint["scope"] = "draft"
+        auth_endpoint["state"] = web.nbrandom(16)
+        tx.user.session["code_verifier"] = code_verifier = web.nbrandom(64)
+        code_challenge = hashlib.sha256(code_verifier).hexdigest()
+        auth_endpoint["code_challenge"] = base64.b64encode(code_challenge)
+        auth_endpoint["code_challenge_method"] = "S256"
+        auth_endpoint["scope"] = "create draft update delete profile email"
         raise web.SeeOther(auth_endpoint)
 
 
