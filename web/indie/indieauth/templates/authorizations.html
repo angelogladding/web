@@ -13,20 +13,15 @@ $for auth in active:
         <p>$r["profile"]</p>
     $if "access_token" in r:
         <p>$r["access_token"]</p>
-    $if auth["revoked"]:
-        <p><em><strong>revoked $auth["revoked"]</strong></em></p>
 
 <h2>Revoked</h2>
 $for auth in revoked:
-    $auth
-    $# <p>$auth["client_id"]<br><small>$auth["redirect_uri"]<br>
-    $# $auth["initiated"]</small></p>
-    $# $ r = auth["response"]
-    $# <p>$", ".join(r["scope"].split())</p>
-    $# $if "profile" in r:
-    $#     <p>$r["profile"]</p>
-    $# $if "access_token" in r:
-    $#     <p>$r["access_token"]</p>
-    $# $ revoked = auth["revoked"]
-    $# $if revoked:
-    $#     <p><em><strong>revoked $revoked</strong></em></p>
+    <p>$auth["client_id"]<br><small>$auth["redirect_uri"]<br>
+    $auth["initiated"]</small></p>
+    $ r = auth["response"]
+    <p>$", ".join(r["scope"].split())</p>
+    $if "profile" in r:
+        <p>$r["profile"]</p>
+    $if "access_token" in r:
+        <p>$r["access_token"]</p>
+    <p><em><strong>revoked $auth["revoked"]</strong></em></p>
