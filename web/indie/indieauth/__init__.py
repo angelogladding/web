@@ -71,8 +71,9 @@ class AuthorizationEndpoint:
                             "state", "code_challenge", "code_challenge_method",
                             scope="")
         except web.BadRequest:
-            auths = tx.db.select("auths")
-            return templates.authorizations(auths)
+            active = tx.db.select("auths", where="revoked = ?", vals=[None])
+            revoked = tx.db.select("auths", where="revoked != ?", vals=[None])
+            return templates.authorizations(active, revoked)
         client, developer = get_client(form.client_id)
         tx.user.session["client_id"] = form.client_id
         tx.user.session["redirect_uri"] = form.redirect_uri

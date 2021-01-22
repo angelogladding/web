@@ -110,11 +110,10 @@ class MicropubEndpoint:
         try:
             form = web.form("q")
         except web.BadRequest:
-            clients = tx.db.select("auths", what="DISTINCT client_id")
             local_client = LocalClient()
             resources = local_client.read_all()
             files = local_client.get_files()
-            return templates.activity(clients, resources, files)
+            return templates.activity(resources, files)
         syndication_endpoints = []
         if form.q == "config":
             web.header("Content-Type", "application/json")
