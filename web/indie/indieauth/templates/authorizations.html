@@ -13,10 +13,8 @@ $for auth in active:
         <p>$r["profile"]</p>
     $if "access_token" in r:
         <p>$r["access_token"]</p>
-    $ revoked = auth["revoked"]
-    $# $ revoked = auth["revoked"]
-    $# $if revoked:
-    $#     <p><em><strong>revoked $revoked</strong></em></p>
+    $if auth["revoked"]:
+        <p><em><strong>revoked $auth["revoked"]</strong></em></p>
 
 <h2>Revoked</h2>
 $for auth in revoked:
