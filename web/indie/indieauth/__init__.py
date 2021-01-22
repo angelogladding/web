@@ -160,7 +160,7 @@ class SignIn:
 
     def _get(self):
         try:
-            form = web.form("me", return_url="/")
+            form = web.form("me", return_to="/")
         except web.BadRequest:
             return templates.identify(tx.host.name)
         try:
