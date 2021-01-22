@@ -1,15 +1,13 @@
 $def with (clients, resources, files)
 $var title: Micropub Activity
 
-<h1>Micropub Activity</h1>
-
 <h2>Clients</h2>
 <ul>
 $for client in clients:
     <li>$client["client_id"]</li>
 </ul>
 
-<h2>Content Resources</h2>
+<h2>Resources</h2>
 <ul>
 $for resource in resources:
     <li>
@@ -20,7 +18,7 @@ $for resource in resources:
     </li>
 </ul>
 
-<h2>Media Files</h2>
+<h2>Files</h2>
 <ul>
 $for file in files:
     <li><a href=/pub/media/$file.name>$file.name</a></li>
