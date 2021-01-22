@@ -5,7 +5,7 @@ $var title: Authorizations
 
 <h2>Active</h2>
 $for auth in active:
-    $auth
+    $dict(auth)
     $# <p>$auth["client_id"]<br><small>$auth["redirect_uri"]<br>
     $# $auth["initiated"]</small></p>
     $# $ r = auth["response"]
