@@ -36,6 +36,8 @@ def discover_post_type(properties):
     """Return the discovered post type."""
     if "bookmark-of" in properties:
         post_type = "bookmark"
+    elif "like-of" in properties:
+        post_type = "like"
     else:
         post_type = "note"
     return post_type
@@ -79,6 +81,8 @@ class LocalClient:
             timeslug = web.timeslug(now)
             if post_type == "note":
                 textslug = properties["content"]
+            elif post_type == "like":
+                textslug = properties["like-of"][0]["properties"]["name"]
             elif post_type == "bookmark":
                 textslug = properties["bookmark-of"][0]["properties"]["name"]
             url += f"/{timeslug}/{web.textslug(textslug)}"
