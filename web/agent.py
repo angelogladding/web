@@ -209,6 +209,10 @@ class Transaction:
         return parse(self.text)
 
     @property
+    def json(self):
+        return json.loads(self.text)
+
+    @property
     def mf2json(self):
         return Semantics(mf.parse(self.text, self.url))
 
