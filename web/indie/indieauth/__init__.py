@@ -176,7 +176,8 @@ class SignIn:
         tx.user.session["code_verifier"] = code_verifier = web.nbrandom(64)
         code_challenge = \
             hashlib.sha256(code_verifier.encode("ascii")).hexdigest()
-        auth_endpoint["code_challenge"] = base64.b64encode(code_challenge)
+        auth_endpoint["code_challenge"] = \
+            base64.b64encode(code_challenge.encode("ascii"))
         auth_endpoint["code_challenge_method"] = "S256"
         auth_endpoint["scope"] = "create draft update delete profile email"
         raise web.SeeOther(auth_endpoint)
