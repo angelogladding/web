@@ -17,9 +17,9 @@ def wrap_server(handler, app):
     """Ensure server links are in head of root document."""
     tx.db.define(auths="""initiated DATETIME NOT NULL DEFAULT
                               CURRENT_TIMESTAMP, revoked DATETIME,
-                          code TEXT, client_id TEXT, redirect_uri TEXT,
+                          code TEXT, client_id TEXT, client_name TEXT,
                           code_challenge TEXT, code_challenge_method TEXT,
-                          response JSON""")
+                          redirect_uri TEXT, response JSON""")
     yield
     if tx.request.uri.path == "":
         doc = web.parse(tx.response.body)
@@ -169,9 +169,10 @@ class Client:
     """IndieAuth server authorized client."""
 
     def _get(self):
-        client = tx.db.select("auths", where="client_id = ?",
-                              vals=[f"https://{self.client_id}"])[0]
-        return templates.client(client)
+        auths = tx.db.select("auths", where="client_id = ?",
+                             vals=[f"https://{self.client_id}"],
+                             order="initiated DESC")
+        return templates.client(auths)
 
 
 @client.route(r"sign-in")
