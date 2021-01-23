@@ -160,7 +160,7 @@ class Clients:
     """IndieAuth server authorized clients."""
 
     def _get(self):
-        clients = tx.db.select("auths", what="DISTINCT client_id")
+        clients = tx.db.select("auths", what="DISTINCT client_id, *")
         return templates.clients(clients)
 
 
@@ -170,7 +170,7 @@ class Client:
 
     def _get(self):
         client = tx.db.select("auths", where="client_id = ?",
-                              vals=[self.client_id])[0]
+                              vals=[f"https://{self.client_id}"])[0]
         return templates.client(client)
 
 
