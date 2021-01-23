@@ -15,7 +15,7 @@ templates = web.templates(__name__)
 
 def wrap_server(handler, app):
     """Ensure server links are in head of root document."""
-    tx.db.define(auths="""initiated DATETIME NOT NULL DEFAULT
+    tx.db.define(auths="""auth_id TEXT, initiated DATETIME NOT NULL DEFAULT
                               CURRENT_TIMESTAMP, revoked DATETIME,
                           code TEXT, client_id TEXT, client_name TEXT,
                           code_challenge TEXT, code_challenge_method TEXT,
@@ -103,11 +103,18 @@ class AuthorizationEndpoint:
         code = web.nbrandom(32)
         s = tx.user.session
         decoded_code_challenge = base64.b64decode(s["code_challenge"]).decode()
-        tx.db.insert("auths", code=code, code_challenge=decoded_code_challenge,
-                     client_id=s["client_id"], client_name=s["client_name"],
-                     redirect_uri=s["redirect_uri"],
-                     code_challenge_method=s["code_challenge_method"],
-                     response={"scope": " ".join(form.scopes)})
+        while True:
+            try:
+                tx.db.insert("auths", auth_id=web.nbrandom(3), code=code,
+                             code_challenge=decoded_code_challenge,
+                             code_challenge_method=s["code_challenge_method"],
+                             client_id=s["client_id"],
+                             client_name=s["client_name"],
+                             redirect_uri=s["redirect_uri"],
+                             response={"scope": " ".join(form.scopes)})
+            except tx.db.IntegrityError:
+                continue
+            break
         redirect_uri["code"] = code
         redirect_uri["state"] = tx.user.session["state"]
         raise web.Found(redirect_uri)
@@ -162,7 +169,7 @@ class Clients:
     """IndieAuth server authorized clients."""
 
     def _get(self):
-        clients = tx.db.select("auths", what="DISTINCT client_id",
+        clients = tx.db.select("auths", what="DISTINCT client_id, client_name",
                                order="client_name ASC")
         return templates.clients(clients)
 
