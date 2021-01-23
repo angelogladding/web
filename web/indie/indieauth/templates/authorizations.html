@@ -5,6 +5,7 @@ $var title: Authorizations
 
 <h2>Active</h2>
 $for auth in active:
+    <div>
     <p>$auth["client_id"]<br><small>$auth["redirect_uri"]<br>
     $auth["initiated"]</small></p>
     $ r = auth["response"]
@@ -13,6 +14,10 @@ $for auth in active:
         <p>$r["profile"]</p>
     $if "access_token" in r:
         <p>$r["access_token"]</p>
+    <form action=/auth/revoke method=post>
+    <button>Revoke Access</button>
+    </form>
+    </div>
 
 <h2>Revoked</h2>
 $for auth in revoked:
