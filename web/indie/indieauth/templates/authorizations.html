@@ -6,7 +6,7 @@ $var title: Authorizations
 <h2>Active</h2>
 $for auth in active:
     <div>
-    <p><a href=/auth/apps/$auth["client_id"].partition("://")>\
+    <p><a href=/auth/apps/$auth["client_id"].partition("://")[2]>\
     $auth["client_id"]</a><br>
     <small>$auth["redirect_uri"]<br>
     $auth["initiated"]</small></p>
