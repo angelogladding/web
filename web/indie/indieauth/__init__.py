@@ -131,7 +131,7 @@ class TokenEndpoint:
         try:
             form = web.form("action", "token")
             if form.action == "revoke":
-                print(form.token)
+                print("REVOKING", form.token)
                 tx.db.update("auths", revoked=web.utcnow(), vals=[form.token],
                              where="""json_extract(response,
                                                    '$.access_token') = ?""")
@@ -257,6 +257,7 @@ class SignOut:
     def _post(self):
         token = tx.db.select("users", where="url = ?",
                              vals=[tx.user.session["me"]])[0]["access_token"]
+        print("SIGNING OUT", token)
         web.post(tx.user.session["token_endpoint"],
                  data={"action": "revoke", "token": token})
         tx.user.session = None
