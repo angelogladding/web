@@ -1,12 +1,10 @@
 $def with (active, revoked)
 $var title: Authorizations
 
-<h1>Authorizations</h1>
-
-<h2>Active</h2>
+<h1>Active Authorizations</h1>
 $for auth in active:
     <div>
-    <p><a href=/auth/apps/$auth["client_id"].partition("://")[2]>\
+    <p><a href=/auth/clients/$auth["client_id"].partition("://")[2]>\
     $auth["client_id"]</a><br>
     <small>$auth["redirect_uri"]<br>
     $auth["initiated"]</small></p>
@@ -23,7 +21,8 @@ $for auth in active:
 
 <h2>Revoked</h2>
 $for auth in revoked:
-    <p>$auth["client_id"]<br><small>$auth["redirect_uri"]<br>
+    <p><a href=/auth/clients/$auth["client_id"].partition("://")[2]>\
+    $auth["client_id"]</a><br>
     $auth["initiated"]</small></p>
     $ r = auth["response"]
     <p>$", ".join(r["scope"].split())</p>
