@@ -95,7 +95,11 @@ class LocalClient:
 
     def get_files(self):
         """Return list of media files."""
-        return list(pathlib.Path(tx.host.name).iterdir())
+        try:
+            files = list(pathlib.Path(tx.host.name).iterdir())
+        except FileNotFoundError:
+            files = []
+        return files
 
     def get_file(self, filename):
         """Return a media file."""
