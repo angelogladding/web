@@ -80,9 +80,8 @@ class AuthorizationEndpoint:
                             "state", "code_challenge", "code_challenge_method",
                             scope="")
         except web.BadRequest:
-            clients = tx.db.select("auths",
-                                   what="DISTINCT client_id, client_name",
-                                   order="client_name ASC")
+            clients = tx.db.select("auths", order="client_name ASC",
+                                   what="DISTINCT client_id, client_name")
             active = tx.db.select("auths", where="revoked is null")
             revoked = tx.db.select("auths", where="revoked not null")
             return templates.authorizations(clients, active, revoked)
