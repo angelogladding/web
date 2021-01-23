@@ -1,8 +1,8 @@
 $def with (auths)
-$ last = auth[0]
-$var title: $last["client_id"]
+$ most_recent = auths[0]
+$var title: $most_recent["client_id"]
 
-<h1>$last["client_id"]</h1>
+<h1>$most_recent["client_id"]</h1>
 
 $for auth in auths:
     <p>$auth["scope"] <strong>$auth["access_token"]</strong></p>
