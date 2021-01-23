@@ -1,7 +1,7 @@
 $def with (active, revoked)
 $var title: Authorizations
 
-<h1>Active Authorizations</h1>
+<h1>Authorizations</h1>
 $for auth in active:
     <div>
     <p><a href=/auth/clients/$auth["client_id"].partition("://")[2]>\
