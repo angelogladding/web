@@ -8,7 +8,7 @@ from web import tx
 
 
 server = web.application("IndieAuthServer", mount_prefix="auth",
-                         client_id=r"[\w/]+")
+                         client_id=r"[\w/.]+")
 client = web.application("IndieAuthClient", mount_prefix="user")
 templates = web.templates(__name__)
 
