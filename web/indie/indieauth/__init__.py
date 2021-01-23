@@ -171,7 +171,7 @@ class Client:
     def _get(self):
         auths = tx.db.select("auths", where="client_id = ?",
                              vals=[f"https://{self.client_id}"],
-                             order="initiated DESC")
+                             order="redirect_uri, initiated DESC")
         return templates.client(auths)
 
 
