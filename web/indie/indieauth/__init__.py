@@ -194,7 +194,7 @@ class Users:
     """."""
 
     def _get(self):
-        return list(dict(r) for r in tx.db.select("users"))
+        return templates.users(dict(r) for r in tx.db.select("users"))
 
 
 @client.route(r"sign-in")
