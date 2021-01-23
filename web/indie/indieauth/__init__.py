@@ -7,7 +7,8 @@ import web
 from web import tx
 
 
-server = web.application("IndieAuthServer", mount_prefix="auth")
+server = web.application("IndieAuthServer", mount_prefix="auth",
+                         client_id=r"[\w/]+")
 client = web.application("IndieAuthClient", mount_prefix="user")
 templates = web.templates(__name__)
 
@@ -152,6 +153,25 @@ class TokenEndpoint:
     def is_token_request(self, scope):
         """Determine whether the list of scopes dictates a token reuqest."""
         return bool(len([s for s in scope if s not in ("profile", "email")]))
+
+
+@server.route(r"clients")
+class Clients:
+    """IndieAuth server authorized clients."""
+
+    def _get(self):
+        clients = tx.db.select("auths", what="DISTINCT client_id")
+        return templates.clients(clients)
+
+
+@server.route(r"clients/{client_id}")
+class Client:
+    """IndieAuth server authorized client."""
+
+    def _get(self):
+        client = tx.db.select("auths", where="client_id = ?",
+                              vals=[self.client_id])
+        return templates.client(client)
 
 
 @client.route(r"sign-in")
