@@ -189,6 +189,14 @@ class Client:
         return templates.client(auths)
 
 
+@client.route(r"")
+class User:
+    """."""
+
+    def _get(self):
+        return list(dict(r) for r in tx.db.select("users"))
+
+
 @client.route(r"sign-in")
 class SignIn:
     """IndieAuth client sign in."""
