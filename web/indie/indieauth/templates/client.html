@@ -5,4 +5,5 @@ $var title: $most_recent["client_id"]
 <h1>$most_recent["client_id"]</h1>
 
 $for auth in auths:
-    <p>$auth["scope"] <strong>$auth["access_token"]</strong></p>
+    $dict(auth)
+    $# <p>$auth["scope"] <strong>$auth["access_token"]</strong></p>
