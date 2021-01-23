@@ -170,7 +170,7 @@ class Client:
 
     def _get(self):
         client = tx.db.select("auths", where="client_id = ?",
-                              vals=[self.client_id])
+                              vals=[self.client_id])[0]
         return templates.client(client)
 
 
