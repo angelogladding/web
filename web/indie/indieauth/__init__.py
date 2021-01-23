@@ -130,6 +130,9 @@ class TokenEndpoint:
     def _post(self):
         try:
             form = web.form("action", "token")
+            print()
+            print("ASDASDASDASD")
+            print()
             if form.action == "revoke":
                 tx.db.update("auths", revoked=web.utcnow(), vals=[form.token],
                              where="""json_extract(response,
