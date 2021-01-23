@@ -254,6 +254,10 @@ class SignOut:
     """IndieAuth client sign out."""
 
     def _post(self):
+        token = tx.db.select("users", where="url = ?",
+                             vals=[tx.user.session["me"]])[0]["access_token"]
+        web.post(tx.user.session["token_endpoint"],
+                 data={"action": "revoke", "token": token})
         tx.user.session = None
         raise web.SeeOther("/")
 
