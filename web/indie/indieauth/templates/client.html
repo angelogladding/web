@@ -4,6 +4,7 @@ $var title: $most_recent["client_id"]
 
 <h1>$most_recent["client_id"]</h1>
 
+$ prev = {"redirect_uri": None}
 $for auth in auths:
     $if prev["redirect_uri"] != auth["redirect_uri"]:
         <p><strong>$auth["redirect_uri"]</strong></p>
