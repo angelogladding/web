@@ -88,7 +88,7 @@ class AuthorizationEndpoint:
             return templates.authorizations(clients, active, revoked)
         client, developer = get_client(form.client_id)
         tx.user.session["client_id"] = form.client_id
-        tx.user.session["client_name"] = client
+        tx.user.session["client_name"] = client["name"]
         tx.user.session["redirect_uri"] = form.redirect_uri
         tx.user.session["state"] = form.state
         tx.user.session["code_challenge"] = form.code_challenge
