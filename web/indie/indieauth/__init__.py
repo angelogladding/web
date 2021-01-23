@@ -63,8 +63,9 @@ def get_client(client_id):
         mfs = web.mf.parse(url=client["url"])
         for item in mfs["items"]:
             if "h-app" in item["type"]:
-                client = {"name": item["properties"]["name"][0],
-                          "url": "https://todo.example"}
+                properties = item["properties"]
+                client = {"name": properties["name"][0],
+                          "url": properties["url"][0]}
                 break
             author = {"name": "NAME", "url": "URL"}  # TODO
     return client, author
