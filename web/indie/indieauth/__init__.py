@@ -9,7 +9,7 @@ from web import tx
 
 server = web.application("IndieAuthServer", mount_prefix="auth",
                          client_id=r"[\w/.]+")
-client = web.application("IndieAuthClient", mount_prefix="user")
+client = web.application("IndieAuthClient", mount_prefix="users")
 templates = web.templates(__name__)
 
 
@@ -36,7 +36,7 @@ def wrap_server(handler, app):
 
 
 def wrap_client(handler, app):
-    """Ensure client database contains user table."""
+    """Ensure client database contains users table."""
     tx.db.define(users="""account_created DATETIME NOT NULL DEFAULT
                               CURRENT_TIMESTAMP, url TEXT, name TEXT,
                           email TEXT, access_token TEXT""")
@@ -190,7 +190,7 @@ class Client:
 
 
 @client.route(r"")
-class User:
+class Users:
     """."""
 
     def _get(self):
@@ -220,7 +220,7 @@ class SignIn:
         auth_endpoint["me"] = form.me
         auth_endpoint["client_id"] = tx.user.session["client_id"] = client_id
         auth_endpoint["redirect_uri"] = tx.user.session["redirect_uri"] = \
-            client_id / "user/sign-in/auth"
+            client_id / "users/sign-in/auth"
         auth_endpoint["response_type"] = "code"
         auth_endpoint["state"] = tx.user.session["state"] = web.nbrandom(16)
         code_verifier = tx.user.session["code_verifier"] = web.nbrandom(64)
