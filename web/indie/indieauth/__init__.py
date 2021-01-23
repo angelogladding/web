@@ -85,6 +85,7 @@ class AuthorizationEndpoint:
             return templates.authorizations(active, revoked)
         client, developer = get_client(form.client_id)
         tx.user.session["client_id"] = form.client_id
+        tx.user.session["client_name"] = client
         tx.user.session["redirect_uri"] = form.redirect_uri
         tx.user.session["state"] = form.state
         tx.user.session["code_challenge"] = form.code_challenge
@@ -103,7 +104,8 @@ class AuthorizationEndpoint:
         s = tx.user.session
         decoded_code_challenge = base64.b64decode(s["code_challenge"]).decode()
         tx.db.insert("auths", code=code, code_challenge=decoded_code_challenge,
-                     client_id=s["client_id"], redirect_uri=s["redirect_uri"],
+                     client_id=s["client_id"], client_name=s["client_name"],
+                     redirect_uri=s["redirect_uri"],
                      code_challenge_method=s["code_challenge_method"],
                      response={"scope": " ".join(form.scopes)})
         redirect_uri["code"] = code
@@ -160,7 +162,8 @@ class Clients:
     """IndieAuth server authorized clients."""
 
     def _get(self):
-        clients = tx.db.select("auths", what="DISTINCT client_id, *")
+        clients = tx.db.select("auths", what="DISTINCT client_id",
+                               order="client_name ASC")
         return templates.clients(clients)
 
 
