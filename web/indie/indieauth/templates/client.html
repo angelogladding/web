@@ -5,4 +5,4 @@ $var title: $most_recent["client_id"]
 <h1>$most_recent["client_id"]</h1>
 
 $for auth in auths:
-    <p><strong>$auth["redirect_uri"]</strong><br><pre>$auth["response"]</pre></p>
+    <p><strong>$auth["redirect_uri"]</strong><br><pre>$pformat(auth["response"])</pre></p>
