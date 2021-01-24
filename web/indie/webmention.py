@@ -9,15 +9,14 @@ receiver = web.application("Webmention", mount_prefix="mentions")
 
 def send_mention(source, target, private=False) -> None:
     """Send a webmention."""
-    source = web.uri.parse(source)
-    target = web.uri.parse(target)
+    source = web.uri(source)
+    target = web.uri(target)
     endpoint = web.discover_link(target, "webmention")
     if not endpoint:
         print(f"no webmention endpoint at {target}")
         return
     if endpoint.startswith("/"):
-        endpoint = (web.uri.parse(target.host, secure=target.is_secure) /
-                    endpoint)
+        endpoint = (web.uri(target.host, secure=target.is_secure) / endpoint)
     payload = {"source": str(source), "target": str(target)}
     # TODO if private:
     # TODO     code = web.nbrandom(32)
@@ -31,6 +30,8 @@ def wrap(handler, app):
     tx.db.define(mentions="""received DATETIME NOT NULL DEFAULT
                                  CURRENT_TIMESTAMP, mention_id TEXT,
                              data JSON, source_url TEXT, target_url TEXT""")
+    # TODO sniff referer header for a mention
+    print(f"REFERER: {tx.request.headers.get('Referer')}")
     yield
     if "mentionable" in handler:
         doc = web.parse(tx.response.body)
@@ -80,7 +81,7 @@ def receive(db, mention_id, source_url, target_url) -> None:
     db.insert("mentions", mention_id=mention_id, source_url=source_url,
               target_url=target_url)
     mention_data = {}
-    source_doc = web.get(source_url)
+    source_doc = tx.cache[source_url]
     source_url = source_doc.url.rstrip("/")
     mention = source_doc.mention(target_url).data  # TODO dict(..) inst .data
     db.update("mentions", what="data = ?", where="mention_id = ?",
@@ -92,7 +93,7 @@ def receive(db, mention_id, source_url, target_url) -> None:
     # XXX if not source_repr:
     # XXX     raise web.BadRequest("No representative h-card found at source.")
 
-    # XXX ZZZ path = web.uri.parse(target_url).path
+    # XXX ZZZ path = web.uri(target_url).path
     # XXX ZZZ plural, _, resource_path = path.partition("/")
     # XXX ZZZ try:
     # XXX ZZZ     t = get_type(plural)
@@ -166,8 +167,7 @@ def receive(db, mention_id, source_url, target_url) -> None:
     #     # TODO public webmention for public follow
     #     # TODO check first private then public
     #     # TODO represent & reciprocate follow accordingly
-    #     root_url = web.uri.parse(source_repr["properties"]["url"][0],
-    #                              secure=True)
+    #     root_url = web.uri(source_repr["properties"]["url"][0], secure=True)
     #     person = get_person(root_url.minimized)
     #     rel = tx.db.select("person__person",
     #                        where="from_id = 1 AND to_id = ?",

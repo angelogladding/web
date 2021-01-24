@@ -91,6 +91,7 @@ class LocalClient:
             properties.update(published=now, url=url, author=author)
         tx.db.insert("resources", url=url, modified=now, types=types,
                      properties=properties)
+        # TODO send_webmentions() using tx.cache[]
         return url
 
     def get_files(self):

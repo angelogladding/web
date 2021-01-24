@@ -50,7 +50,7 @@ def get_client(client_id):
     author = None
     if client["url"].startswith("https://addons.mozilla.org"):
         try:
-            heading = web.get(client_id).dom.select("h1.AddonTitle")[0]
+            heading = tx.cache[client_id].dom.select("h1.AddonTitle")[0]
         except IndexError:
             pass
         else:
@@ -207,7 +207,7 @@ class SignIn:
         except web.BadRequest:
             return templates.identify(tx.host.name)
         try:
-            rels = web.get(form.me).mf2json["rels"]
+            rels = tx.cache[form.me].mf2json["rels"]
         except web.ConnectionError:
             return f"can't reach https://{form.me}"
         auth_endpoint = web.uri(rels["authorization_endpoint"][0])
