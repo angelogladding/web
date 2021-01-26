@@ -211,6 +211,7 @@ class MediaFile:
 
     def _get(self):
         content_types = {(".jpg", ".jpeg"): "image/jpg",
+                         ".png": "image/png",
                          ".mp3": "audio/mpeg",
                          ".mp4": "video/mp4"}
         for suffix, content_type in content_types.items():
