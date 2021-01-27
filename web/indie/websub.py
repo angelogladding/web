@@ -33,7 +33,7 @@ class Hub:
         return "hub.."
 
 
-@sub.route(r"")
+@subs.route(r"")
 class Subscriptions:
     """."""
 

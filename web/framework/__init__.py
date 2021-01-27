@@ -1227,6 +1227,10 @@ class Transaction:
         return self.owner == self.user.session.get("me")
 
     @property
+    def cache(self):
+        return self.host.cache
+
+    @property
     def db(self):
         try:
             return self.host.db
