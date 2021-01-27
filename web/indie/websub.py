@@ -4,8 +4,8 @@ import web
 from web import tx
 
 
-pub = web.application("WebSubPublisher", mount_prefix="hub")
-sub = web.application("WebSubSubscriber", mount_prefix="subscriptions")
+hub = web.application("WebSubHub", mount_prefix="hub")
+subs = web.application("WebSubSubs", mount_prefix="subs")
 
 
 def wrap_hub(handler, app):
@@ -25,7 +25,7 @@ def wrap_hub(handler, app):
         web.header("Link", f'</hub>; rel="hub"', add=True)
 
 
-@pub.route(r"")
+@hub.route(r"")
 class Hub:
     """."""
 
