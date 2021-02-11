@@ -14,8 +14,7 @@ templates = web.templates(__name__)
 
 def wrap_server(handler, app):
     """Ensure server links are in head of root document."""
-    tx.db.define(resources="""url TEXT, modified DATETIME, types TEXT,
-                              properties JSON""",
+    tx.db.define(resources="""resource JSON, url TEXT, modified DATETIME""",
                  files="""fid TEXT, sha256 TEXT UNIQUE, size INTEGER""",
                  syndication="""destination JSON NOT NULL""")
     tx.pub = LocalClient()
@@ -38,6 +37,8 @@ def discover_post_type(properties):
         post_type = "bookmark"
     elif "like-of" in properties:
         post_type = "like"
+    elif "follow-of" in properties:
+        post_type = "follow"
     else:
         post_type = "note"
     return post_type
@@ -60,39 +61,48 @@ class LocalClient:
 
     def read_all(self, limit=20):
         """Return a list of all resources."""
-        return tx.db.select("resources", order="url ASC")
+        return tx.db.select("resources", order="modified DESC")
 
     def recent_entries(self, limit=20):
         """Return a list of recent entries."""
-        return tx.db.select("""resources""",
-                            where="types == 'h-entry'",
-                            order="""json_extract(resources.properties,
-                                     '$.published') DESC""")
+        return tx.db.select("""resources""", order="modified DESC",
+                            where="""json_extract(resources.resource,
+                                                  '$.type[0]') == 'h-entry'""")
 
-    def create(self, types, properties):
+    def create(self, *types, visibility="public", **properties):
         """Write a resource and return its permalink."""
         now = web.utcnow()
         url = f"https://{tx.host.name}"
-        if types == "h-card":
+        if "h-card" in types:
             if properties["uid"] == str(web.uri(tx.host.name)):
                 pass
-        elif types == "h-entry":
+        elif "h-entry" in types:
             post_type = discover_post_type(properties)
             timeslug = web.timeslug(now)
             if post_type == "note":
                 textslug = properties["content"]
-            elif post_type == "like":
-                textslug = properties["like-of"][0]["properties"]["name"]
             elif post_type == "bookmark":
                 textslug = properties["bookmark-of"][0]["properties"]["name"]
+            elif post_type == "like":
+                textslug = properties["like-of"][0]["properties"]["name"]
+            elif post_type == "follow":
+                props = properties["follow-of"][0]["properties"]
+                tx.sub.follow(props["url"])
+                textslug = props["name"]
             url += f"/{timeslug}/{web.textslug(textslug)}"
             author = {"type": ["h-card"],
-                      "properties": self.read("")["properties"]}
+                      "properties": self.read("")["resource"]["properties"]}
             properties.update(published=now, url=url, author=author)
-        tx.db.insert("resources", url=url, modified=now, types=types,
-                     properties=properties)
+        tx.db.insert("resources", url=url, modified=now,
+                     resource={"type": types, "visibility": visibility,
+                               "properties": properties})
         # TODO send_webmentions() using tx.cache[]
         return url
+
+    def search(self, query):
+        return tx.db.select("resources", vals=[query],
+                            where="""json_extract(resources.resource,
+                                     '$.properties.bookmark-of[0].properties.url') == ?""")
 
     def get_files(self):
         """Return list of media files."""
@@ -121,16 +131,24 @@ class MicropubEndpoint:
             return templates.activity(resources, files)
         syndication_endpoints = []
         if form.q == "config":
-            web.header("Content-Type", "application/json")
-            return {"q": ["category", "contact", "source", "syndicate-to"],
-                    "media-endpoint": f"https://{tx.host.name}/pub/media",
-                    "syndicate-to": syndication_endpoints}
-        return "unsupported `q` command"
+            response = {"q": ["category", "contact", "source", "syndicate-to"],
+                        "media-endpoint": f"https://{tx.host.name}/pub/media",
+                        "syndicate-to": syndication_endpoints,
+                        "visibility": ["public", "unlisted", "private"]}
+        elif form.q == "source":
+            response = {}
+            if "search" in form:
+                response = {"items": [{"url": [r["resource"]["properties"]["url"]]} for r in
+                                      LocalClient().search(form.search)]}
+        else:
+            raise web.BadRequest("unsupported query. check `q=config` for support.")
+        web.header("Content-Type", "application/json")
+        return response
 
     def _post(self):
         resource = tx.request.body._data
-        permalink = LocalClient().create(" ".join(resource["type"]),
-                                         resource["properties"])
+        permalink = LocalClient().create(*resource["type"], visibility=resource["visibility"],
+                                         **resource["properties"])
         web.header("Link", f'</blat>; rel="shortlink"', add=True)
         web.header("Link", f'<https://twitter.com/angelogladding/status/'
                            f'30493490238590234>; rel="syndication"', add=True)

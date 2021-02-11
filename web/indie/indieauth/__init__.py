@@ -103,7 +103,7 @@ class AuthorizationEndpoint:
         redirect_uri = web.uri(tx.user.session["redirect_uri"])
         if form.action == "cancel":
             raise web.Found(redirect_uri)
-        code = web.nbrandom(32)
+        code = f"secret-token:{web.nbrandom(32)}"
         s = tx.user.session
         decoded_code_challenge = base64.b64decode(s["code_challenge"]).decode()
         while True:

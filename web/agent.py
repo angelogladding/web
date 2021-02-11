@@ -21,7 +21,7 @@ import solarized
 import sql
 import uri
 
-__all__ = ["get", "post", "parse", "browser", "cache", "discover_link"]
+__all__ = ["get", "post", "subscribe", "parse", "browser", "cache", "discover_link"]
 
 displays = []
 browsers = []
@@ -122,6 +122,33 @@ def get(url, **kwargs):
 def post(url, **kwargs):
     """Post to the web."""
     return Transaction(url, "post", **kwargs)
+
+
+def subscribe(url):
+    """Subscribe from the web using Braid."""
+    return requests.get(url, headers={"Subscribe": "keep-alive"}, stream=True)
+
+
+def multi_subscribe(*urls):
+    """Yield patches from multiple subscriptions."""
+    queue = web.queue()
+    def producer(url):
+        def _producer():
+            for patch in web.subscribe(url):
+                queue.put_nowait(patch)
+            queue.put_nowait("COMPLETED")
+        return _producer
+    for url in urls:
+        web.spawn(producer(url))
+    completed = 0
+    while True:
+        patch = queue.get(timeout=5)
+        if patch == "COMPLETED":
+            completed += 1
+            if completed == len(urls):
+                break
+            continue
+        yield patch + b"\n"
 
 
 class Cache:

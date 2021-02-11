@@ -1,0 +1,13 @@
+$def with (following)
+$var title: Subscription
+
+<form action=/sub method=post>
+<div><label>Feed address <input type=text name=url
+placeholder="eg. https://.., hyper://.., ipfs://.."></label></div>
+<button name=action value=follow>Follow</button>
+</form>
+
+<ul>
+$for feed in following:
+    <li>$dict(feed)</li>
+</ul>

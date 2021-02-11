@@ -18,6 +18,8 @@ import collections
 import datetime
 # import errno
 import getpass
+from gevent import spawn
+from gevent.queue import Queue
 import hashlib
 import hmac
 import inspect
@@ -26,12 +28,14 @@ import json
 import os
 import pkg_resources
 import pathlib
+import pprint
 import re
 import secrets
 import shutil
 import signal
 import sys
 import time
+from time import sleep
 import urllib
 import wsgiref.util
 
@@ -83,7 +87,8 @@ __all__ = ["application", "serve", "anti_csrf", "form", "secure_form",
            "default_session_timeout", "uwsgi", "textslug", "get_host_hash",
            "config_servers", "b64encode", "b64decode", "timeslug",
            "enqueue", "run_redis", "kill_redis", "get_apps", "nb60_re",
-           "wordlist", "generate_passphrase", "verify_passphrase"]
+           "wordlist", "generate_passphrase", "verify_passphrase", "sleep",
+           "spawn", "Queue"]
 
 kvdb = kv.db("web", ":", {"auth:secret": "string",
                           "auth:nonces": "set",
@@ -679,6 +684,16 @@ class Application:
         self.cache = cache()
 
         self.db = get_app_db(name)
+        class Database:
+            def _get(innerself):
+                return tx.db.tables
+        self.route(r".data")(Database)
+        self.add_path_args(table=r"\w+")
+        class Table:
+            def _get(innerself):
+                return pprint.pformat([dict(r) for r in tx.db.select(innerself.table)])
+        self.route(r".data/{table}")(Table)
+
         self.kv = kv.db("web", ":", {"jobqueue": "list"},
                         socket="web-redis.sock")
         if static:
@@ -718,7 +733,7 @@ class Application:
                 payload = pathlib.Path(icon_path)
 
             class Icon:
-                def _get(self):
+                def _get(innerself):
                     header("Content-Type", "image/png")
                     try:
                         with payload.open("rb") as fp:
@@ -730,7 +745,7 @@ class Application:
         if serve:
             self.serve(serve)
 
-    def serve(self, port):
+    def serve(self, port, host="127.0.0.1"):
         # must be called from custom jupyter kernel/head of your program:
         # XXX from gevent import monkey
         # XXX monkey.patch_all()
@@ -748,9 +763,10 @@ class Application:
                            f"<span>{duration}<span>ms</span></span>"
                            f"</div>")
                 print(message)
-        server = gevent.pywsgi.WSGIServer(("127.0.0.1", port), self, log=Log)
-        self.server = gevent.spawn(server.serve_forever)
-        self.server.spawn()  # TODO start()?
+        server = gevent.pywsgi.WSGIServer((host, port), self, log=Log)
+        server.serve_forever()
+        # TODO self.server = gevent.spawn(server.serve_forever)
+        # TODO self.server.spawn()  # TODO start()?
 
     def reload_config(self, path=None):
         self.cfg = {}
@@ -953,6 +969,12 @@ class Application:
                 response_hooks.append(_hook)
 
             self.try_socket()  # NOTE wrappers finish when socket disconnects
+
+            if tx.request.headers.get("Subscribe") == "keep-alive":
+                start_response("200 OK", [("X-Accel-Buffering", "no"),
+                                          ("Content-Type", "application/json")])
+                return tx.request.controller._subscribe()
+
             tx.response.status = "200 OK"
             tx.response.headers.x_powered_by = "web.py"
             method = tx.request.method
@@ -1024,6 +1046,24 @@ class Application:
             return [bytes(json.dumps(tx.response.body), "utf-8")]
         return [bytes(str(tx.response.body), "utf-8")]
 
+    # def __gevent_call__(self, environ, start_response):
+    #     """gevent's WSGI callable."""
+    #     tx.request._contextualize(environ)
+    #     tx.response._contextualize()
+    #     path = tx.request.uri.path
+    #     controller = self.get_controller(path)
+    #     if tx.request.headers.get("Subscribe") == "keep-alive":
+    #         handler = controller._subscribe
+    #     else:
+    #         handler = controller._get
+    #     start_response("200 OK", [("Content-Type", "application/json")])
+    #     return handler()
+
+    # if uwsgi:
+    #     __call__ = __uwsgi_call__
+    # else:
+    #     __call__ = __gevent_call__
+
     def get_controller(self, path):
         """
 
@@ -1070,12 +1110,16 @@ class Application:
     def get_handler(self, controller, method="get"):
         method = f"_{method.lower()}"
         try:
-            handler = getattr(controller, method)
+            return getattr(controller, method)
         except AttributeError:
+            if method == "_head":
+                try:
+                    return getattr(controller, "_get")
+                except AttributeError:
+                    pass
             exc = MethodNotAllowed(self.view.error.method_not_allowed(method))
             exc.allowed = inspect.getmembers(controller, ismethod)
             raise exc
-        return handler
 
 
 if uwsgi:
