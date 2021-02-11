@@ -983,8 +983,6 @@ class Application:
                 if forced_method:
                     method = forced_method.upper()
 
-            # XXX hooks moved from here up to there
-
             tx.request.controller.get_data()
             body = self.get_handler(tx.request.controller, method)()
             if body is None:

@@ -100,9 +100,11 @@ class LocalClient:
         return url
 
     def search(self, query):
-        return tx.db.select("resources", vals=[query],
+        return tx.db.select("resources", vals=[query, query],
                             where="""json_extract(resources.resource,
-                                     '$.properties.bookmark-of[0].properties.url') == ?""")
+                                     '$.properties.bookmark-of[0].properties.url') == ? OR
+                                     json_extract(resources.resource,
+                                     '$.properties.like-of[0].properties.url') == ?""")
 
     def get_files(self):
         """Return list of media files."""
