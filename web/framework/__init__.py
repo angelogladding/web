@@ -971,8 +971,10 @@ class Application:
             self.try_socket()  # NOTE wrappers finish when socket disconnects
 
             if tx.request.headers.get("Subscribe") == "keep-alive":
-                start_response("200 OK", [("X-Accel-Buffering", "no"),
-                                          ("Content-Type", "application/json")])
+                start_response("209 Subscription",
+                               [("X-Accel-Buffering", "no"),
+                                ("Subscribe", "keep-alive"),
+                                ("Content-Type", "application/json")])
                 return tx.request.controller._subscribe()
 
             tx.response.status = "200 OK"
