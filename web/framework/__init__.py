@@ -985,14 +985,15 @@ class Application:
                 patch_count = tx.request.headers.get("Patches")
                 if patch_count:
                     # TODO handle multiple patches
-                    raw_headers, _, patch = tx.request.body.decode().partition("\n\n")
+                    raw_headers, _, patch = \
+                        tx.request.body.decode().partition("\n\n")
                     patch_headers = headers.Headers.from_lines(raw_headers)
                     version = patch_headers.get("version")
                     parents = patch_headers.get("parents")
                     merge_type = patch_headers.get("merge-type")
                     patches = [(patch_headers, patch)]
-                    tx.request.controller._patch(version, parents, merge_type,
-                                                 patches)
+                    tx.request.controller._publish(version, parents,
+                                                   merge_type, patches)
                     header("Patches", "OK")
                     raise OK(b"")
 
