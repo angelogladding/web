@@ -72,9 +72,7 @@ class Headers(dict):
 
         """
         headers = cls()
-        for line in lines:
-            if len(line.strip()) == 0:
-                break
+        for line in lines.splitlines():
             name, _, value = (part.strip() for part in line.partition(":"))
             headers[name] = value
         return headers

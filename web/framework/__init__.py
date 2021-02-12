@@ -25,6 +25,7 @@ import hmac
 import inspect
 import io
 import json
+import jsonpatch
 import os
 import pkg_resources
 import pathlib
@@ -88,7 +89,7 @@ __all__ = ["application", "serve", "anti_csrf", "form", "secure_form",
            "config_servers", "b64encode", "b64decode", "timeslug",
            "enqueue", "run_redis", "kill_redis", "get_apps", "nb60_re",
            "wordlist", "generate_passphrase", "verify_passphrase", "sleep",
-           "spawn", "Queue"]
+           "spawn", "Queue", "random"]
 
 kvdb = kv.db("web", ":", {"auth:secret": "string",
                           "auth:nonces": "set",
@@ -969,18 +970,33 @@ class Application:
                 response_hooks.append(_hook)
 
             self.try_socket()  # NOTE wrappers finish when socket disconnects
+            method = tx.request.method
+            tx.response.headers.x_powered_by = "web.py"
 
-            if tx.request.headers.get("Subscribe") == "keep-alive":
-                start_response("209 Subscription",
-                               [("X-Accel-Buffering", "no"),
-                                ("Subscribe", "keep-alive"),
-                                ("Content-Type", "application/json")])
-                return (bytes(json.dumps(patch), "utf-8")
-                        for patch in tx.request.controller._subscribe())
+            if method == "GET":
+                if tx.request.headers.get("Subscribe") == "keep-alive":
+                    start_response("209 Subscription",
+                                   [("X-Accel-Buffering", "no"),
+                                    ("Subscribe", "keep-alive"),
+                                    ("Content-Type", "application/json")])
+                    return (bytes(json.dumps(patch), "utf-8")
+                            for patch in tx.request.controller._subscribe())
+            if method == "PUT":
+                patch_count = tx.request.headers.get("Patches")
+                if patch_count:
+                    # TODO handle multiple patches
+                    raw_headers, _, patch = tx.request.body.decode().partition("\n\n")
+                    patch_headers = headers.Headers.from_lines(raw_headers)
+                    version = patch_headers.get("version")
+                    parents = patch_headers.get("parents")
+                    merge_type = patch_headers.get("merge-type")
+                    patches = [(patch_headers, patch)]
+                    tx.request.controller._patch(version, parents, merge_type,
+                                                 patches)
+                    header("Patches", "OK")
+                    raise OK(b"")
 
             tx.response.status = "200 OK"
-            tx.response.headers.x_powered_by = "web.py"
-            method = tx.request.method
             if method == "GET":
                 forced_method = Form().get("_http_method")
                 if forced_method:
