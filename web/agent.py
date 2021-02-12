@@ -134,7 +134,7 @@ def multi_subscribe(*urls):
     queue = web.queue()
     def producer(url):
         def _producer():
-            for patch in web.subscribe(url):
+            for patch in subscribe(url):
                 queue.put_nowait(patch)
             queue.put_nowait("COMPLETED")
         return _producer
