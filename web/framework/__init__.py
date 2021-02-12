@@ -975,7 +975,8 @@ class Application:
                                [("X-Accel-Buffering", "no"),
                                 ("Subscribe", "keep-alive"),
                                 ("Content-Type", "application/json")])
-                return tx.request.controller._subscribe()
+                return (bytes(json.dumps(patch), "utf-8")
+                        for patch in tx.request.controller._subscribe())
 
             tx.response.status = "200 OK"
             tx.response.headers.x_powered_by = "web.py"
