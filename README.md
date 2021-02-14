@@ -3,7 +3,7 @@ tools for metamodern web development
 
     >>> import web
 
-## A web browser
+## Browser
 
 uses Firefox via Selenium
 
@@ -11,7 +11,7 @@ uses Firefox via Selenium
     >>> browser.go("en.wikipedia.org/wiki/Pasta")
     >>> browser.shot("wikipedia-pasta.png")
 
-## A web cache
+## Cache
 
 uses SQLite
 
@@ -21,7 +21,7 @@ uses SQLite
     >>> cache["indieweb.org/note"].entry["summary"]  # served from cache
     "A note is a post that is typically short unstructured* plain text, written & posted quickly, that has its own permalink page."
 
-## A simple application
+## Application
 
 WSGI-compatible
 
@@ -43,14 +43,14 @@ In `setup.py`:
           entry_points={"web.apps": ["hello:app"]},
           ...)
 
-### Templating
+## Templating
 
 Full Python inside string templates.
 
     >>> web.template("$def with (name)\n$name")("Alice")
     "Alice"
 
-### Markdown
+## Markdown
 
 Strict syntax subset (there should be one and only one way).
 
@@ -59,7 +59,7 @@ Picoformat support eg. @person, @@org, #tag, %license
     >>> str(web.mkdn("*lorem* ipsum."))
     "<p><em>lorem</em> ipsum. </p>"
 
-### URL parsing
+## URL parsing
 
 Defaults to safe-mode and raises DangerousURL eagerly. Up-to-date public suffix and HSTS support.
 
@@ -71,8 +71,13 @@ Defaults to safe-mode and raises DangerousURL eagerly. Up-to-date public suffix 
     >>> url.is_hsts()
     True
 
-### IndieWeb
+## IndieWeb
 
 Supported: IndieAuth client/server, Micropub client/server, Microsub :construction:, WebSub :construction:, Webmention :construction:
 
-    >>> app.mount(web.indieauth.client)
+    >>> app.mount(web.indieauth.server)
+    >>> app.mount(web.micropub.server)
+
+### Microformats
+
+Parse `mf2` from HTML. Analyze vocabularies for stability/interoperability.

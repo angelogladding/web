@@ -142,6 +142,8 @@ class MicropubEndpoint:
             if "search" in form:
                 response = {"items": [{"url": [r["resource"]["properties"]["url"]]} for r in
                                       LocalClient().search(form.search)]}
+            if "url" in form:
+                response = dict(LocalClient().read(form.url))
         else:
             raise web.BadRequest("unsupported query. check `q=config` for support.")
         web.header("Content-Type", "application/json")
